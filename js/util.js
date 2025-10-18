@@ -1,3 +1,11 @@
+// Функция возвращает случайное целое число в промежутке от a до b включительно
+const getRandomInteger = (a, b) => {
+  const lower = Math.ceil(Math.min(a, b));
+  const upper = Math.floor(Math.max(a, b));
+  const result = Math.random() * (upper - lower + 1) + lower;
+  return Math.floor(result);
+};
+
 // Функция создаёт уникальную случайно перемешанную последовательность чисел от minValue до maxValue
 function uniqueRandomSequence(minValue, maxValue) {
   const numbersArray = [];
@@ -11,15 +19,6 @@ function uniqueRandomSequence(minValue, maxValue) {
   // Возвращаем перемешанный массив
   return numbersArray;
 }
-
-// Функция возвращает случайное целое число в промежутке от a до b включительно
-const getRandomInteger = (a, b) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a, b));
-  const result = Math.random() * (upper - lower + 1) + lower;
-  return Math.floor(result);
-};
-export {getRandomInteger};
 
 // Генерация случайного имени из списка возможных имён
 function randomNameGenerator() {
@@ -78,7 +77,8 @@ function commentsArrayCreator() {
   }
   return commentsArray;
 }
-
+// Случайное число комментариев для генерации (от 0 до 30 включительно)
+const commentsCount = getRandomInteger(0, 30);
 
 // Функция создаёт объект описания для одного фото
 function photoDescriptionCreator(_, descriptionIndex) {
