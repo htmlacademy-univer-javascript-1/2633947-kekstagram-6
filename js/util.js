@@ -61,6 +61,9 @@ function commentGenerator() {
   return selectedSentences.join(' ');
 }
 
+// Случайное число комментариев для генерации (от 0 до 30 включительно)
+const commentsCount = getRandomInteger(0, 30);
+
 // Генерирует массив комментариев для одного фото
 function commentsArrayCreator() {
   const commentsArray = [];
@@ -77,8 +80,6 @@ function commentsArrayCreator() {
   }
   return commentsArray;
 }
-// Случайное число комментариев для генерации (от 0 до 30 включительно)
-const commentsCount = getRandomInteger(0, 30);
 
 // Функция создаёт объект описания для одного фото
 function photoDescriptionCreator(_, descriptionIndex) {
