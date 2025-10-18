@@ -11,7 +11,6 @@ function uniqueRandomSequence(minValue, maxValue) {
   // Возвращаем перемешанный массив
   return numbersArray;
 }
-export {uniqueRandomSequence};
 
 // Функция возвращает случайное целое число в промежутке от a до b включительно
 const getRandomInteger = (a, b) => {
@@ -33,7 +32,6 @@ function randomNameGenerator() {
   const randomIndexName = Math.floor(Math.random() * namesArray.length);
   return namesArray[randomIndexName];
 }
-export {randomNameGenerator};
 
 // Генерация "случайного" комментария из одной или двух уникальных фраз
 function commentGenerator() {
@@ -63,7 +61,24 @@ function commentGenerator() {
   // Собираем итоговый комментарий
   return selectedSentences.join(' ');
 }
-export {commentGenerator};
+
+// Генерирует массив комментариев для одного фото
+function commentsArrayCreator() {
+  const commentsArray = [];
+  // Уникальные id для комментариев в случайном порядке
+  const commentIds = uniqueRandomSequence(0, commentsCount - 1);
+  // Создаём массив объектов-комментариев
+  for (let i = 0; i < commentsCount; i++) {
+    commentsArray.push({
+      id: commentIds[i], // Уникальный id
+      avatar: `img/avatar-${getRandomInteger(1, 6)}.svg`, // Случайный аватар
+      message: commentGenerator(), // Случайный комментарий
+      name: randomNameGenerator() // Случайное имя
+    });
+  }
+  return commentsArray;
+}
+
 
 // Функция создаёт объект описания для одного фото
 function photoDescriptionCreator(_, descriptionIndex) {

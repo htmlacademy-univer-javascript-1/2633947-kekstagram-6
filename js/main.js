@@ -1,2 +1,2 @@
-import { similarPhotoDescriptions } from "./data";
-console.log(similarPhotoDescriptions);
+import { similarPhotoDescriptions } from './data';
+similarPhotoDescriptions();
