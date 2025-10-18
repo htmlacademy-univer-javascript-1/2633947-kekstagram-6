@@ -1,11 +1,28 @@
-const getRandomInteger = (a, b) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a, b));
-  const result = Math.random() * (upper - lower + 1) + lower;
-  return Math.floor(result);
+function uniqueRandomSequence(minValue, maxValue) {
+  const numbersArray = [];
+  for (let currentIndex = minValue; currentIndex <= maxValue; currentIndex++) {
+    numbersArray.push(currentIndex);
+  }
+  for (let i = numbersArray.length - 1; i > 0; i--) {
+    const randomNumberIndex = getRandomInteger(0, i);
+    [numbersArray[i], numbersArray[randomNumberIndex]] = [numbersArray[randomNumberIndex], numbersArray[i]];
+  }
+  return numbersArray;
+}
 
-function generateComment() {
-  let sentences = [
+function randomNameGenerator() {
+  const namesArray = [
+    'Иван',
+    'Мария',
+    'Алексей',
+    'Анна'
+  ];
+  const randomIndexName = Math.floor(Math.random() * namesArray.length);
+  return namesArray[randomIndexName];
+}
+
+function commentGenerator() {
+  const sentencesArray = [
     'Всё отлично!',
     'В целом всё неплохо.',
     'Но не всё.',
@@ -16,65 +33,46 @@ function generateComment() {
     'Лица у людей на фотке перекошены, как будто их избивают.',
     'Как можно было поймать такой неудачный момент?!'
   ];
-  let count = getRandomInteger(1, 2);
-  let selected = [];
-  let used = [];
-  while (selected.length < count && used.length < sentences.length) {
-    let idx = getRandomInteger(0, sentences.length - 1);
-    if (used.indexOf(idx) === -1) {
-      selected.push(sentences[idx]);
-      used.push(idx);
+  const sentenceCount = Math.floor(Math.random() * 2) + 1;
+  const selectedSentences = [];
+  const usedSentenceIndexes = new Set();
+
+  while (selectedSentences.length < sentenceCount && usedSentenceIndexes.size < sentencesArray.length) {
+    const randomSentenceIndex = Math.floor(Math.random() * sentencesArray.length);
+    if (!usedSentenceIndexes.has(randomSentenceIndex)) {
+      selectedSentences.push(sentencesArray[randomSentenceIndex]);
+      usedSentenceIndexes.add(randomSentenceIndex);
     }
   }
-  return selected.join(' ');
+  return selectedSentences.join(' ');
 }
 
-function generateRandomName() {
-  let names = ['Иван', 'Мария', 'Алексей', 'Анна'];
-  let idx = getRandomInteger(0, names.length - 1);
-  return names[idx];
-}
+const descriptionsCount = 25;
+const commentsCount = getRandomInteger(0, 30);
 
-function createComment(id) {
-  let comment = {};
-  comment.id = id;
-  let avatarNum = getRandomInteger(1, 6);
-  comment.avatar = 'img/avatar-' + avatarNum + '.svg';
-  comment.message = generateComment();
-  comment.name = generateRandomName();
-  return comment;
-}
-
-function createComments() {
-  let commentsArr = [];
-  let commentsCount = getRandomInteger(0, 30);
-  let ids = getUniqueRandomSequence(0, 30);
-  for (let i = 0; i < commentsCount; i = i + 1) {
-    commentsArr.push(createComment(ids[i]));
+function commentsArrayCreator() {
+  const commentsArray = [];
+  const commentIds = uniqueRandomSequence(0, commentsCount - 1);
+  for (let i = 0; i < commentsCount; i++) {
+    commentsArray.push({
+      id: commentIds[i],
+      avatar: `img/avatar-${getRandomInteger(1, 6)}.svg`,
+      message: commentGenerator(),
+      name: randomNameGenerator()
+    });
   }
-  return commentsArr;
+  return commentsArray;
 }
 
-function createPhotoDescription(id) {
-  let photo = {};
-  photo.id = id;
-  photo.url = 'photos/' + id + '.jpg';
-  photo.description = 'Очень прикольная фотография';
-  photo.likes = getRandomInteger(15, 200);
-  photo.comments = createComments();
-  return photo;
+function photoDescriptionCreator(_, descriptionIndex) {
+  return {
+    id: descriptionIndex + 1,
+    url: `photos/${descriptionIndex + 1}.jpg`,
+    description: 'Очень прикольная фотография',
+    likes: getRandomInteger(15, 200),
+    comments: commentsArrayCreator()
+  };
 }
 
-function createAllPhotos() {
-  let photoDescriptions = [];
-  let photoIds = getUniqueRandomSequence(1, 25);
-  for (let i = 0; i < 25; i = i + 1) {
-    photoDescriptions.push(createPhotoDescription(photoIds[i]));
-  }
-  return photoDescriptions;
-}
-
-let allPhotos = createAllPhotos();
-
-console.log(allPhotos);
-}
+const similarPhotoDescriptions = Array.from({ length: descriptionsCount }, photoDescriptionCreator);
+console.log(similarPhotoDescriptions);
