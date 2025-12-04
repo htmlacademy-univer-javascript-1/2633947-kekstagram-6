@@ -1,5 +1,3 @@
-// thumbnail-renderer.js
-
 const createThumbnailElement = (photoData) => {
   const template = document.querySelector('#picture');
 
@@ -60,7 +58,6 @@ const renderThumbnails = (photos) => {
     }
   }
 
-  // Очищаем контейнер
   thumbnailsContainer.innerHTML = '';
 
   // Создаем DocumentFragment
@@ -71,11 +68,9 @@ const renderThumbnails = (photos) => {
     fragment.appendChild(createThumbnailElement(photo));
   });
 
-  // Вставляем все сразу
   thumbnailsContainer.appendChild(fragment);
 
   return photos.length;
 };
 
 export { renderThumbnails };
-// d

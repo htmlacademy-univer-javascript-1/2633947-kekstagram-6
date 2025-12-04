@@ -1,5 +1,3 @@
-// main.js
-
 // Импортируем модули
 import { generatePhotoDescriptions } from './data.js';
 import { renderThumbnails } from './thumbnail-renderer.js';
@@ -115,13 +113,10 @@ const openBigPicture = (photoData) => {
 
 // Инициализация при загрузке страницы
 const init = () => {
-  // Генерируем тестовые данные
   const photos = generatePhotoDescriptions();
 
-  // Отрисовываем миниатюры
   renderThumbnails(photos);
 
-  // Добавляем обработчики фильтров
   setupFilters(photos);
 };
 
