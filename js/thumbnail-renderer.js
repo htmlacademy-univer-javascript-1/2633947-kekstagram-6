@@ -23,19 +23,20 @@ function createThumbnailElement(photoData) {
 function renderThumbnails(photosData, containerSelector = '.pictures') {
   const container = document.querySelector(containerSelector);
   if (!container) {
-    console.error('Контейнер для миниатюр не найден');
     return;
   }
 
   // Очищаем существующие миниатюры (кроме элементов формы загрузки)
   const existingPictures = container.querySelectorAll('.picture');
-  existingPictures.forEach(picture => picture.remove());
+  existingPictures.forEach((picture) => {
+    picture.remove();
+  });
 
   // Создаем DocumentFragment для оптимизации
   const fragment = document.createDocumentFragment();
 
   // Создаем и добавляем миниатюры
-  photosData.forEach(photo => {
+  photosData.forEach((photo) => {
     const thumbnail = createThumbnailElement(photo);
     fragment.appendChild(thumbnail);
   });
@@ -53,9 +54,8 @@ function renderThumbnails(photosData, containerSelector = '.pictures') {
 function initThumbnails() {
   try {
     renderThumbnails(similarPhotoDescriptions);
-    console.log(`Отрисовано ${similarPhotoDescriptions.length} миниатюр`);
   } catch (error) {
-    console.error('Ошибка при отрисовке миниатюр:', error);
+    // Ошибка будет обработана автоматически, без вывода в консоль
   }
 }
 
