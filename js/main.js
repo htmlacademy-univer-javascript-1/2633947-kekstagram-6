@@ -187,3 +187,16 @@ window.debug = {
 };
 
 console.log('Модуль main.js загружен');
+
+// Добавьте в конец main.js для отладки
+console.log('=== ПРОВЕРКА ===');
+const photos = generatePhotoDescriptions();
+console.log('Сгенерировано фото:', photos.length);
+console.log('Пример фото:', {
+  id: photos[0].id,
+  url: photos[0].url,
+  description: photos[0].description,
+  likes: photos[0].likes,
+  commentsCount: photos[0].comments.length
+});
+console.log('Миниатюры отрисованы:', document.querySelectorAll('.picture').length);
