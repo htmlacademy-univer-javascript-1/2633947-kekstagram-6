@@ -1,3 +1,5 @@
+// data.js
+
 // Функция для генерации случайного числа
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));
@@ -118,3 +120,7 @@ const generatePhotoDescriptions = () => {
 
 // Экспорт функций
 export { generatePhotoDescriptions, createComment };
+
+
+
+//h
