@@ -1,8 +1,9 @@
+// thumbnail-renderer.js
+
 const createThumbnailElement = (photoData) => {
   const template = document.querySelector('#picture');
 
   if (!template) {
-    console.error('Шаблон #picture не найден!');
     return document.createDocumentFragment();
   }
 
@@ -40,7 +41,6 @@ const renderThumbnails = (photos) => {
   const picturesContainer = document.querySelector('.pictures');
 
   if (!picturesContainer) {
-    console.error('Контейнер .pictures не найден!');
     return 0;
   }
 
@@ -78,3 +78,4 @@ const renderThumbnails = (photos) => {
 };
 
 export { renderThumbnails };
+// d
