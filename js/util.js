@@ -1,3 +1,4 @@
+// util.js
 // Функция возвращает случайное целое число в промежутке от a до b включительно
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));
@@ -91,4 +92,5 @@ function photoDescriptionCreator(_, descriptionIndex) {
     comments: commentsArrayCreator() // Массив комментариев для фото
   };
 }
+
 export {photoDescriptionCreator};
