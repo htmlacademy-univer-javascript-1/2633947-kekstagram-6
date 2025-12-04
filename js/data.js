@@ -1,5 +1,3 @@
-// data.js
-
 // Функция для генерации случайного числа
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));
@@ -42,9 +40,7 @@ const createComment = () => {
   let message = '';
 
   for (let i = 0; i < sentenceCount; i++) {
-    if (i > 0) {
-      message += ' ';
-    }
+    if (i > 0) message += ' ';
     message += MESSAGES[getRandomInteger(0, MESSAGES.length - 1)];
   }
 
@@ -120,7 +116,3 @@ const generatePhotoDescriptions = () => {
 
 // Экспорт функций
 export { generatePhotoDescriptions, createComment };
-
-
-
-//h
