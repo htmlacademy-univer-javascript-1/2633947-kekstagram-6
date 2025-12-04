@@ -1,23 +1,23 @@
+// main.js
 
 // Импортируем модули
 import { generatePhotoDescriptions } from './data.js';
 import { renderThumbnails } from './thumbnail-renderer.js';
 
 // Обработка события клика по миниатюре
-document.addEventListener('thumbnailClick', (event) => {
+const onThumbnailClick = (event) => {
   const photoData = event.detail.photoData;
-  console.log('Выбрано фото для полноэкранного просмотра:', photoData.description);
-
   // Открываем полноэкранный просмотр
   openBigPicture(photoData);
-});
+};
+
+document.addEventListener('thumbnailClick', onThumbnailClick);
 
 // Функция для открытия полноэкранного просмотра
-function openBigPicture(photoData) {
+const openBigPicture = (photoData) => {
   const bigPictureSection = document.querySelector('.big-picture');
 
   if (!bigPictureSection) {
-    console.error('Секция полноэкранного просмотра не найдена!');
     return;
   }
 
@@ -37,13 +37,14 @@ function openBigPicture(photoData) {
   commentsCount.textContent = photoData.comments.length;
 
   // Показываем сколько комментариев отображено
-  socialCommentCount.innerHTML = `${Math.min(5, photoData.comments.length)} из <span class="comments-count">${photoData.comments.length}</span> комментариев`;
+  const shownComments = Math.min(5, photoData.comments.length);
+  socialCommentCount.innerHTML = `${shownComments} из <span class="comments-count">${photoData.comments.length}</span> комментариев`;
 
   // Заполняем комментарии (первые 5)
   socialComments.innerHTML = '';
   const commentsToShow = photoData.comments.slice(0, 5);
 
-  commentsToShow.forEach(comment => {
+  commentsToShow.forEach((comment) => {
     const commentElement = document.createElement('li');
     commentElement.className = 'social__comment';
     commentElement.innerHTML = `
@@ -59,10 +60,10 @@ function openBigPicture(photoData) {
   if (loadMoreButton && photoData.comments.length > 5) {
     let commentsShown = 5;
 
-    loadMoreButton.addEventListener('click', function loadMoreComments() {
+    const loadMoreComments = () => {
       const nextComments = photoData.comments.slice(commentsShown, commentsShown + 5);
 
-      nextComments.forEach(comment => {
+      nextComments.forEach((comment) => {
         const commentElement = document.createElement('li');
         commentElement.className = 'social__comment';
         commentElement.innerHTML = `
@@ -79,8 +80,9 @@ function openBigPicture(photoData) {
       if (commentsShown >= photoData.comments.length) {
         loadMoreButton.remove();
       }
-    });
+    };
 
+    loadMoreButton.addEventListener('click', loadMoreComments);
     loadMoreButton.style.display = 'block';
   } else if (loadMoreButton) {
     loadMoreButton.style.display = 'none';
@@ -94,12 +96,7 @@ function openBigPicture(photoData) {
   if (cancelButton) {
     const closeHandler = () => {
       bigPictureSection.classList.add('hidden');
-      // Убираем обработчик после закрытия
       cancelButton.removeEventListener('click', closeHandler);
-      // Сбрасываем обработчик "Загрузить еще"
-      if (loadMoreButton) {
-        loadMoreButton.replaceWith(loadMoreButton.cloneNode(true));
-      }
     };
 
     cancelButton.addEventListener('click', closeHandler);
@@ -114,56 +111,55 @@ function openBigPicture(photoData) {
   };
 
   document.addEventListener('keydown', escKeyHandler);
-}
+};
 
 // Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
+const init = () => {
   // Генерируем тестовые данные
   const photos = generatePhotoDescriptions();
 
   // Отрисовываем миниатюры
-  const renderedCount = renderThumbnails(photos);
-
-  console.log(`Отрисовано ${renderedCount} миниатюр`);
+  renderThumbnails(photos);
 
   // Добавляем обработчики фильтров
   setupFilters(photos);
-});
+};
+
+document.addEventListener('DOMContentLoaded', init);
 
 // Функция для настройки фильтров
-function setupFilters(photos) {
-  const filterButtons = document.querySelectorAll('.img-filters__button');
+const setupFilters = (photos) => {
+  const filterDefault = document.getElementById('filter-default');
+  const filterRandom = document.getElementById('filter-random');
+  const filterDiscussed = document.getElementById('filter-discussed');
 
-  if (!filterButtons.length) return;
-
-  // Показываем фильтры
-  const filtersContainer = document.querySelector('.img-filters');
-  if (filtersContainer) {
-    filtersContainer.classList.remove('img-filters--inactive');
+  if (filterDefault) {
+    filterDefault.addEventListener('click', () => {
+      renderThumbnails(photos);
+      updateActiveFilter('filter-default');
+    });
   }
 
-  // Обработчики для кнопок фильтров
-  document.getElementById('filter-default')?.addEventListener('click', () => {
-    renderThumbnails(photos);
-    updateActiveFilter('filter-default');
-  });
+  if (filterRandom) {
+    filterRandom.addEventListener('click', () => {
+      const shuffled = [...photos].sort(() => Math.random() - 0.5).slice(0, 10);
+      renderThumbnails(shuffled);
+      updateActiveFilter('filter-random');
+    });
+  }
 
-  document.getElementById('filter-random')?.addEventListener('click', () => {
-    const shuffled = [...photos].sort(() => Math.random() - 0.5).slice(0, 10);
-    renderThumbnails(shuffled);
-    updateActiveFilter('filter-random');
-  });
-
-  document.getElementById('filter-discussed')?.addEventListener('click', () => {
-    const sorted = [...photos].sort((a, b) => b.comments.length - a.comments.length);
-    renderThumbnails(sorted);
-    updateActiveFilter('filter-discussed');
-  });
-}
+  if (filterDiscussed) {
+    filterDiscussed.addEventListener('click', () => {
+      const sorted = [...photos].sort((a, b) => b.comments.length - a.comments.length);
+      renderThumbnails(sorted);
+      updateActiveFilter('filter-discussed');
+    });
+  }
+};
 
 // Функция для обновления активного фильтра
-function updateActiveFilter(activeId) {
-  document.querySelectorAll('.img-filters__button').forEach(button => {
+const updateActiveFilter = (activeId) => {
+  document.querySelectorAll('.img-filters__button').forEach((button) => {
     button.classList.remove('img-filters__button--active');
   });
 
@@ -171,32 +167,6 @@ function updateActiveFilter(activeId) {
   if (activeButton) {
     activeButton.classList.add('img-filters__button--active');
   }
-}
-
-// Для отладки в консоли
-window.debug = {
-  generatePhotos: generatePhotoDescriptions,
-  renderSample: () => {
-    const photos = generatePhotoDescriptions();
-    renderThumbnails(photos.slice(0, 3));
-  },
-  openFirstPhoto: () => {
-    const photos = generatePhotoDescriptions();
-    openBigPicture(photos[0]);
-  }
 };
 
-console.log('Модуль main.js загружен');
-
-// Добавьте в конец main.js для отладки
-console.log('=== ПРОВЕРКА ===');
-const photos = generatePhotoDescriptions();
-console.log('Сгенерировано фото:', photos.length);
-console.log('Пример фото:', {
-  id: photos[0].id,
-  url: photos[0].url,
-  description: photos[0].description,
-  likes: photos[0].likes,
-  commentsCount: photos[0].comments.length
-});
-console.log('Миниатюры отрисованы:', document.querySelectorAll('.picture').length);
+//g
