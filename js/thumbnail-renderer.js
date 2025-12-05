@@ -13,8 +13,9 @@ function createThumbnailElement(photoData) {
   thumbnailElement.querySelector('.picture__likes').textContent = photoData.likes;
   thumbnailElement.querySelector('.picture__comments').textContent = photoData.comments.length;
 
-  // Добавляем данные фотографии в элемент для дальнейшего использования
+  // Добавляем данные фотографии для полноэкранного просмотра
   thumbnailElement.dataset.photoId = photoData.id;
+  thumbnailElement.href = '#';
 
   return thumbnailElement;
 }
