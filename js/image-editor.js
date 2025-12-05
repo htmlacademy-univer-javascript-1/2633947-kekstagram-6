@@ -127,8 +127,6 @@ function resetScale() {
 
 // Функция применения эффекта
 function applyEffect(value) {
-  const effect = EFFECTS[currentEffect];
-
   if (currentEffect === 'none') {
     imgUploadPreview.style.filter = 'none';
     effectLevel.classList.add('hidden');
