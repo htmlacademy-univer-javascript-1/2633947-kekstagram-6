@@ -12,7 +12,6 @@ const uploadOverlay = uploadForm.querySelector('.img-upload__overlay');
 const uploadCancel = uploadForm.querySelector('#upload-cancel');
 const hashtagInput = uploadForm.querySelector('.text__hashtags');
 const descriptionInput = uploadForm.querySelector('.text__description');
-const submitButton = uploadForm.querySelector('#upload-submit');
 const body = document.body;
 
 // Инициализация Pristine
@@ -164,15 +163,11 @@ function onFormSubmit(evt) {
 
   if (isValid) {
     // Отправляем форму (позже будет доработано)
-    console.log('Форма валидна, отправляем данные...');
-
     // Временно показываем простое сообщение
     alert('Форма отправлена успешно!');
 
     // Закрываем форму после отправки
     closeUploadForm();
-  } else {
-    console.log('Форма содержит ошибки');
   }
 }
 
@@ -222,8 +217,6 @@ function initFormValidator() {
   descriptionInput.addEventListener('input', () => {
     pristine.validate();
   });
-
-  console.log('Модуль валидации формы инициализирован');
 }
 
 // Экспортируем функции
