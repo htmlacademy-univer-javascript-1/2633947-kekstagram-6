@@ -94,8 +94,8 @@ function initSlider() {
   effectLevel.classList.add('hidden');
 
   // Обработчик изменения слайдера
-  effectLevelSlider.noUiSlider.on('update', (values, handle) => {
-    const value = values[handle];
+  effectLevelSlider.noUiSlider.on('update', (values) => {
+    const value = values[0];
     effectLevelValue.value = value;
     applyEffect(value);
   });
