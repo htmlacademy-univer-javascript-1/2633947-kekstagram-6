@@ -15,14 +15,26 @@ const descriptionInput = uploadForm.querySelector('.text__description');
 const body = document.body;
 
 // Инициализация Pristine
-const pristine = new Pristine(uploadForm, {
-  classTo: 'img-upload__field-wrapper',
-  errorClass: 'img-upload__field-wrapper--invalid',
-  successClass: 'img-upload__field-wrapper--valid',
-  errorTextParent: 'img-upload__field-wrapper',
-  errorTextTag: 'span',
-  errorTextClass: 'img-upload__error'
-}, true);
+let pristine;
+
+// Проверяем доступность Pristine
+if (typeof Pristine === 'undefined') {
+  // Используем простую валидацию, если Pristine не загружен
+  pristine = {
+    validate: () => true,
+    reset: () => {},
+    addValidator: () => {}
+  };
+} else {
+  pristine = new Pristine(uploadForm, {
+    classTo: 'img-upload__field-wrapper',
+    errorClass: 'img-upload__field-wrapper--invalid',
+    successClass: 'img-upload__field-wrapper--valid',
+    errorTextParent: 'img-upload__field-wrapper',
+    errorTextTag: 'span',
+    errorTextClass: 'img-upload__error'
+  }, true);
+}
 
 // Функция для проверки хэш-тегов на уникальность
 function hasUniqueHashtags(hashtags) {
@@ -109,18 +121,20 @@ function getDescriptionErrorMessage(value) {
     : '';
 }
 
-// Добавляем правила валидации
-pristine.addValidator(
-  hashtagInput,
-  validateHashtags,
-  getHashtagErrorMessage
-);
+// Добавляем правила валидации только если Pristine доступен
+if (typeof Pristine !== 'undefined') {
+  pristine.addValidator(
+    hashtagInput,
+    validateHashtags,
+    getHashtagErrorMessage
+  );
 
-pristine.addValidator(
-  descriptionInput,
-  validateDescription,
-  getDescriptionErrorMessage
-);
+  pristine.addValidator(
+    descriptionInput,
+    validateDescription,
+    getDescriptionErrorMessage
+  );
+}
 
 // Функция для открытия формы редактирования
 function openUploadForm() {
@@ -162,12 +176,8 @@ function onFormSubmit(evt) {
   const isValid = pristine.validate();
 
   if (isValid) {
-    // Отправляем форму (позже будет доработано)
-    // Временно показываем простое сообщение
-    alert('Форма отправлена успешно!');
-
-    // Закрываем форму после отправки
-    closeUploadForm();
+    // Отправляем форму
+    uploadForm.submit();
   }
 }
 
