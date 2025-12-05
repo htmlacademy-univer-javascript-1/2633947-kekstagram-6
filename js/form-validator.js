@@ -1,5 +1,3 @@
-// form-validator.js
-
 // Константы
 const MAX_HASHTAGS = 5;
 const MAX_DESCRIPTION_LENGTH = 140;
