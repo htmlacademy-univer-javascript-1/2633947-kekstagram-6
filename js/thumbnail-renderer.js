@@ -1,4 +1,3 @@
-// thumbnail-renderer.js
 import { similarPhotoDescriptions } from './data.js';
 
 // Функция для создания миниатюры на основе шаблона

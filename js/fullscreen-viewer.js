@@ -1,4 +1,3 @@
-// fullscreen-viewer.js
 import { similarPhotoDescriptions } from './data.js';
 
 const bigPicture = document.querySelector('.big-picture');
