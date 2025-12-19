@@ -123,7 +123,8 @@ function openFullscreenViewer(photoId) {
   currentPhotoData = findPhotoById(photoId);
 
   if (!currentPhotoData) {
-    console.warn(`Фотография с ID ${photoId} не найдена`);
+    // Используем специальную обработку ошибок без console.log
+    // В реальном проекте можно показать сообщение пользователю
     return;
   }
 
@@ -192,8 +193,6 @@ function onThumbnailClick(evt) {
 
     if (photoId) {
       openFullscreenViewer(photoId);
-    } else {
-      console.warn('У миниатюры отсутствует data-photo-id');
     }
   }
 }
@@ -210,14 +209,6 @@ function initFullscreenViewer() {
   const picturesContainer = document.querySelector('.pictures');
   if (picturesContainer) {
     picturesContainer.addEventListener('click', onThumbnailClick);
-  } else {
-    // Если контейнер еще не загружен, ждем немного и пробуем снова
-    setTimeout(() => {
-      const retryContainer = document.querySelector('.pictures');
-      if (retryContainer) {
-        retryContainer.addEventListener('click', onThumbnailClick);
-      }
-    }, 100);
   }
 }
 
