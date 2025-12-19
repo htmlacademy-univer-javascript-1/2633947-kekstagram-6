@@ -1,5 +1,3 @@
-import { similarPhotoDescriptions } from './data.js';
-
 const bigPicture = document.querySelector('.big-picture');
 const closeButton = bigPicture.querySelector('.big-picture__cancel');
 const body = document.body;
@@ -30,8 +28,8 @@ function findPhotoById(photoId) {
     return window.loadedPhotosData.find((photo) => photo.id === Number(photoId));
   }
 
-  // Если глобальных данных нет, используем локальные
-  return similarPhotoDescriptions.find((photo) => photo.id === Number(photoId));
+  // Если глобальных данных нет, возвращаем null
+  return null;
 }
 
 // Функция для создания элемента комментария
@@ -125,6 +123,7 @@ function openFullscreenViewer(photoId) {
   currentPhotoData = findPhotoById(photoId);
 
   if (!currentPhotoData) {
+    console.warn(`Фотография с ID ${photoId} не найдена`);
     return;
   }
 
@@ -183,6 +182,22 @@ function onCommentsLoaderClick() {
   showNextComments();
 }
 
+// Функция для обработки кликов на миниатюры (вынесена отдельно для лучшей читаемости)
+function onThumbnailClick(evt) {
+  const thumbnail = evt.target.closest('.picture');
+
+  if (thumbnail) {
+    evt.preventDefault();
+    const photoId = thumbnail.dataset.photoId;
+
+    if (photoId) {
+      openFullscreenViewer(photoId);
+    } else {
+      console.warn('У миниатюры отсутствует data-photo-id');
+    }
+  }
+}
+
 // Инициализация модуля
 function initFullscreenViewer() {
   // Добавляем обработчики событий
@@ -191,16 +206,19 @@ function initFullscreenViewer() {
   bigPicture.addEventListener('click', onOverlayClick);
   commentsLoader.addEventListener('click', onCommentsLoaderClick);
 
-  // Добавляем обработчики кликов на миниатюры
-  document.querySelector('.pictures').addEventListener('click', (evt) => {
-    const thumbnail = evt.target.closest('.picture');
-
-    if (thumbnail) {
-      evt.preventDefault();
-      const photoId = thumbnail.dataset.photoId;
-      openFullscreenViewer(photoId);
-    }
-  });
+  // Добавляем обработчик кликов на миниатюры
+  const picturesContainer = document.querySelector('.pictures');
+  if (picturesContainer) {
+    picturesContainer.addEventListener('click', onThumbnailClick);
+  } else {
+    // Если контейнер еще не загружен, ждем немного и пробуем снова
+    setTimeout(() => {
+      const retryContainer = document.querySelector('.pictures');
+      if (retryContainer) {
+        retryContainer.addEventListener('click', onThumbnailClick);
+      }
+    }, 100);
+  }
 }
 
 // Экспортируем функции
