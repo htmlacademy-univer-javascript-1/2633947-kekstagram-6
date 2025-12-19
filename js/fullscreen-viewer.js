@@ -23,6 +23,17 @@ const COMMENTS_PER_PAGE = 5;
 let currentPhotoData = null;
 let commentsShown = 0;
 
+// Функция для поиска фото по ID
+function findPhotoById(photoId) {
+  // Сначала пробуем использовать глобальные данные
+  if (window.loadedPhotosData && window.loadedPhotosData.length > 0) {
+    return window.loadedPhotosData.find((photo) => photo.id === Number(photoId));
+  }
+
+  // Если глобальных данных нет, используем локальные
+  return similarPhotoDescriptions.find((photo) => photo.id === Number(photoId));
+}
+
 // Функция для создания элемента комментария
 function createCommentElement(comment) {
   const commentElement = document.createElement('li');
@@ -111,7 +122,7 @@ function renderComments() {
 // Функция для открытия полноэкранного просмотра
 function openFullscreenViewer(photoId) {
   // Находим данные фотографии
-  currentPhotoData = similarPhotoDescriptions.find((photo) => photo.id === Number(photoId));
+  currentPhotoData = findPhotoById(photoId);
 
   if (!currentPhotoData) {
     return;

@@ -1,5 +1,4 @@
-import { similarPhotoDescriptions } from './data.js';
-
+// thumbnail-renderer.js
 // Функция для создания миниатюры на основе шаблона
 function createThumbnailElement(photoData) {
   const template = document.querySelector('#picture');
@@ -32,6 +31,11 @@ function renderThumbnails(photosData, containerSelector = '.pictures') {
     picture.remove();
   });
 
+  // Если нет данных, не рисуем ничего
+  if (!photosData || photosData.length === 0) {
+    return;
+  }
+
   // Создаем DocumentFragment для оптимизации
   const fragment = document.createDocumentFragment();
 
@@ -51,9 +55,11 @@ function renderThumbnails(photosData, containerSelector = '.pictures') {
 }
 
 // Основная функция инициализации
-function initThumbnails() {
+function initThumbnails(photosData = []) {
   try {
-    renderThumbnails(similarPhotoDescriptions);
+    // Используем переданные данные или глобальные
+    const dataToRender = photosData.length > 0 ? photosData : (window.loadedPhotosData || []);
+    renderThumbnails(dataToRender);
   } catch (error) {
     // Ошибка будет обработана автоматически, без вывода в консоль
   }

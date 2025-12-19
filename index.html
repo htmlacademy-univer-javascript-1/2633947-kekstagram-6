@@ -241,5 +241,25 @@
   <script src="main.js" type="module"></script>
   <script src="functions.js"></script>
   <script src="js/main.js" type="module"></script>
+
+  <!-- Шаблон сообщения об успехе -->
+  <template id="success">
+    <div class="success">
+      <div class="success__inner">
+        <h2 class="success__title">Изображение успешно загружено</h2>
+        <button type="button" class="success__button">Круто!</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Шаблон сообщения об ошибке -->
+  <template id="error">
+    <div class="error">
+      <div class="error__inner">
+        <h2 class="error__title">Ошибка загрузки файла</h2>
+        <button type="button" class="error__button">Попробовать ещё раз</button>
+      </div>
+    </div>
+  </template>
 </body>
 </html>
