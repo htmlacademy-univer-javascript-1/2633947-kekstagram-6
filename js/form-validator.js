@@ -1,3 +1,8 @@
+// form-validator.js
+import { sendForm } from './api.js';
+import { showSuccessMessage, showErrorMessage } from './messages.js';
+import { resetEditor } from './image-editor.js';
+
 // Константы
 const MAX_HASHTAGS = 5;
 const MAX_DESCRIPTION_LENGTH = 140;
@@ -10,6 +15,7 @@ const uploadOverlay = uploadForm.querySelector('.img-upload__overlay');
 const uploadCancel = uploadForm.querySelector('#upload-cancel');
 const hashtagInput = uploadForm.querySelector('.text__hashtags');
 const descriptionInput = uploadForm.querySelector('.text__description');
+const submitButton = uploadForm.querySelector('.img-upload__submit');
 const body = document.body;
 
 // Инициализация Pristine
@@ -134,11 +140,20 @@ if (typeof Pristine !== 'undefined') {
   );
 }
 
+// Функция для блокировки/разблокировки кнопки отправки
+function toggleSubmitButton(isDisabled) {
+  submitButton.disabled = isDisabled;
+  submitButton.textContent = isDisabled ? 'Отправляю...' : 'Опубликовать';
+}
+
 // Функция для открытия формы редактирования
 function openUploadForm() {
   uploadOverlay.classList.remove('hidden');
   body.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
+
+  // Разблокируем кнопку отправки
+  toggleSubmitButton(false);
 }
 
 // Функция для закрытия формы редактирования
@@ -151,8 +166,17 @@ function closeUploadForm() {
   uploadForm.reset();
   pristine.reset();
 
+  // Сбрасываем редактор изображений
+  if (typeof resetEditor === 'function') {
+    resetEditor();
+  }
+
   // Особенно важно сбросить значение файлового поля
   uploadFileInput.value = '';
+
+  // Разблокируем кнопку отправки
+  toggleSubmitButton(false);
+  submitButton.textContent = 'Опубликовать';
 }
 
 // Обработчик изменения файла
@@ -167,15 +191,38 @@ function onCancelButtonClick() {
   closeUploadForm();
 }
 
-// Обработчик отправки формы
-function onFormSubmit(evt) {
+// Обработчик отправки формы через AJAX
+async function onFormSubmit(evt) {
   evt.preventDefault();
 
   const isValid = pristine.validate();
 
   if (isValid) {
-    // Отправляем форму
-    uploadForm.submit();
+    // Блокируем кнопку отправки
+    toggleSubmitButton(true);
+
+    try {
+      const formData = new FormData(evt.target);
+
+      // Отправляем данные на сервер
+      await sendForm(formData);
+
+      // Показываем сообщение об успехе
+      showSuccessMessage();
+
+      // Закрываем форму и сбрасываем ее
+      closeUploadForm();
+
+    } catch (error) {
+      // Показываем сообщение об ошибке
+      showErrorMessage();
+
+      // Форма остается открытой с сохраненными данными
+      // (как требуется в пункте 3.5)
+    } finally {
+      // Разблокируем кнопку отправки
+      toggleSubmitButton(false);
+    }
   }
 }
 

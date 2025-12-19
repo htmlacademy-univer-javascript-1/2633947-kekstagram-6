@@ -1,10 +1,7 @@
-// data.js
-import {photoDescriptionCreator} from './util.js';
+import { photoDescriptionCreator } from './util.js';
 
-// Количество фото для генерации
-const descriptionsCount = 25;
+// Оставляем генерацию данных как резервный вариант
+const similarPhotoDescriptions = Array.from({ length: 25 }, photoDescriptionCreator);
 
-// Генерируем массив из 25 объектов-фотографий с описаниями и комментариями
-const similarPhotoDescriptions = Array.from({ length: descriptionsCount }, photoDescriptionCreator);
-
-export {similarPhotoDescriptions};
+// Экспортируем данные для обратной совместимости
+export { similarPhotoDescriptions };
