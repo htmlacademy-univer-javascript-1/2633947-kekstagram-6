@@ -1,4 +1,3 @@
-// thumbnail-renderer.js
 // Функция для создания миниатюры на основе шаблона
 function createThumbnailElement(photoData) {
   const template = document.querySelector('#picture');

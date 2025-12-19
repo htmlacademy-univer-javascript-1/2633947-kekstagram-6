@@ -1,13 +1,19 @@
-// main.js
 import { initThumbnails } from './thumbnail-renderer.js';
 import { initFullscreenViewer } from './fullscreen-viewer.js';
 import { initFormValidator } from './form-validator.js';
 import { initImageEditor } from './image-editor.js';
 import { loadPhotos } from './api.js';
 import { showAlert } from './messages.js';
+import { initFilters } from './filters.js';
+import { renderThumbnails } from './thumbnail-renderer.js';
 
 // Глобальная переменная для хранения загруженных данных
 let photosData = [];
+
+// Функция для отрисовки миниатюр через фильтры
+function renderPhotosWithFilters(photos) {
+  renderThumbnails(photos);
+}
 
 // Загружаем данные с сервера
 async function loadDataFromServer() {
@@ -20,6 +26,10 @@ async function loadDataFromServer() {
     if (typeof initThumbnails === 'function') {
       initThumbnails(photosData);
     }
+
+    // Инициализируем фильтры
+    initFilters(photosData, renderPhotosWithFilters);
+
   } catch (error) {
     showAlert('Не удалось загрузить фотографии. Попробуйте обновить страницу');
     // Используем пустой массив, чтобы не ломать существующий функционал
