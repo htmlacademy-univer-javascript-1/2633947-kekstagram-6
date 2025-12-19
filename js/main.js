@@ -1,4 +1,3 @@
-// main.js
 import { similarPhotoDescriptions } from './data.js';
 import { initThumbnails } from './thumbnail-renderer.js';
 import { initFullscreenViewer } from './fullscreen-viewer.js';

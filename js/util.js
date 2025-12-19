@@ -1,4 +1,3 @@
-// util.js
 // Функция возвращает случайное целое число в промежутке от a до b включительно
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));

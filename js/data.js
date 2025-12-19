@@ -1,4 +1,3 @@
-// data.js
 import {photoDescriptionCreator} from './util.js';
 
 // Количество фото для генерации
