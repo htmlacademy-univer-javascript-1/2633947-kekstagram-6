@@ -191,8 +191,7 @@ function onFileInputChange(evt) {
     // Открываем форму с выбранным файлом
     openUploadForm(file);
   } else if (file) {
-    // Можно добавить отображение ошибки для неверного формата
-    console.warn('Выбранный файл не является изображением');
+    // Убираем console.warn() и просто сбрасываем поле
     uploadFileInput.value = ''; // Сбрасываем поле
   }
 }
@@ -211,7 +210,6 @@ async function onFormSubmit(evt) {
   if (isValid) {
     // Проверяем, что файл загружен
     if (!uploadFileInput.files || uploadFileInput.files.length === 0) {
-      // Можно добавить отображение ошибки
       return;
     }
 

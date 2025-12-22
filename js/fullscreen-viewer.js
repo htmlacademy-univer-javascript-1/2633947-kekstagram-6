@@ -1,306 +1,222 @@
-import { resetScale } from './scale.js'; // Добавим этот модуль позже
+const bigPicture = document.querySelector('.big-picture');
+const closeButton = bigPicture.querySelector('.big-picture__cancel');
+const body = document.body;
+
+// Элементы для заполнения данными
+const bigPictureImg = bigPicture.querySelector('.big-picture__img img');
+const likesCount = bigPicture.querySelector('.likes-count');
+const commentsCount = bigPicture.querySelector('.comments-count');
+const socialComments = bigPicture.querySelector('.social__comments');
+const socialCaption = bigPicture.querySelector('.social__caption');
+
+// Элементы для постраничной загрузки комментариев
+const socialCommentCount = bigPicture.querySelector('.social__comment-count');
+const commentsLoader = bigPicture.querySelector('.comments-loader');
+const commentsShownElement = socialCommentCount.querySelector('.social__comment-shown-count');
 
 // Константы
-const SCALE_STEP = 25;
-const SCALE_MIN = 25;
-const SCALE_MAX = 100;
-const SCALE_DEFAULT = 100;
+const COMMENTS_PER_PAGE = 5;
 
-const EFFECTS = {
-  none: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: ''
-  },
-  chrome: {
-    filter: 'grayscale',
-    min: 0,
-    max: 1,
-    step: 0.1,
-    unit: ''
-  },
-  sepia: {
-    filter: 'sepia',
-    min: 0,
-    max: 1,
-    step: 0.1,
-    unit: ''
-  },
-  marvin: {
-    filter: 'invert',
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: '%'
-  },
-  phobos: {
-    filter: 'blur',
-    min: 0,
-    max: 3,
-    step: 0.1,
-    unit: 'px'
-  },
-  heat: {
-    filter: 'brightness',
-    min: 1,
-    max: 3,
-    step: 0.1,
-    unit: ''
+// Переменные для хранения текущего состояния
+let currentPhotoData = null;
+let commentsShown = 0;
+
+// Функция для поиска фото по ID
+function findPhotoById(photoId) {
+  // Сначала пробуем использовать глобальные данные
+  if (window.loadedPhotosData && window.loadedPhotosData.length > 0) {
+    return window.loadedPhotosData.find((photo) => photo.id === Number(photoId));
   }
-};
 
-// Элементы
-const uploadForm = document.querySelector('.img-upload__form');
-const uploadFileInput = uploadForm.querySelector('#upload-file');
-const imgUploadPreview = uploadForm.querySelector('.img-upload__preview img');
-const effectsPreviews = uploadForm.querySelectorAll('.effects__preview');
-const scaleControlValue = uploadForm.querySelector('.scale__control--value');
-const scaleControlSmaller = uploadForm.querySelector('.scale__control--smaller');
-const scaleControlBigger = uploadForm.querySelector('.scale__control--bigger');
-const effectsList = uploadForm.querySelector('.effects__list');
-const effectLevel = uploadForm.querySelector('.img-upload__effect-level');
-const effectLevelSlider = uploadForm.querySelector('.effect-level__slider');
-const effectLevelValue = uploadForm.querySelector('.effect-level__value');
+  // Если глобальных данных нет, возвращаем null
+  return null;
+}
 
-// Переменные состояния
-let currentScale = SCALE_DEFAULT;
-let currentEffect = 'none';
+// Функция для создания элемента комментария
+function createCommentElement(comment) {
+  const commentElement = document.createElement('li');
+  commentElement.classList.add('social__comment');
 
-// Инициализация noUiSlider
-function initSlider() {
-  if (!effectLevelSlider) {
+  const img = document.createElement('img');
+  img.classList.add('social__picture');
+  img.src = comment.avatar;
+  img.alt = comment.name;
+  img.width = 35;
+  img.height = 35;
+
+  const text = document.createElement('p');
+  text.classList.add('social__text');
+  text.textContent = comment.message;
+
+  commentElement.appendChild(img);
+  commentElement.appendChild(text);
+
+  return commentElement;
+}
+
+// Функция для обновления счетчика комментариев
+function updateCommentsCounter() {
+  const totalComments = currentPhotoData.comments.length;
+  const commentsShownText = commentsShown > totalComments ? totalComments : commentsShown;
+
+  // Создаем элемент для отображения количества, если его нет
+  if (!commentsShownElement) {
+    const span = document.createElement('span');
+    span.classList.add('social__comment-shown-count');
+    socialCommentCount.innerHTML = '';
+    socialCommentCount.appendChild(document.createTextNode(''));
+    socialCommentCount.appendChild(span);
+    socialCommentCount.appendChild(document.createTextNode(` из ${totalComments} комментариев`));
+  } else {
+    commentsShownElement.textContent = commentsShownText;
+  }
+}
+
+// Функция для отображения следующей порции комментариев
+function showNextComments() {
+  if (!currentPhotoData) {
     return;
   }
 
-  noUiSlider.create(effectLevelSlider, {
-    range: {
-      min: 0,
-      max: 100
-    },
-    start: 100,
-    step: 1,
-    connect: 'lower',
-    format: {
-      to: function (value) {
-        if (Number.isInteger(value)) {
-          return value.toFixed(0);
-        }
-        return value.toFixed(1);
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
+  const totalComments = currentPhotoData.comments.length;
+  const nextComments = currentPhotoData.comments.slice(commentsShown, commentsShown + COMMENTS_PER_PAGE);
+
+  // Создаем фрагмент для оптимизации
+  const fragment = document.createDocumentFragment();
+
+  // Добавляем следующую порцию комментариев
+  nextComments.forEach((comment) => {
+    fragment.appendChild(createCommentElement(comment));
+  });
+
+  socialComments.appendChild(fragment);
+
+  // Обновляем счетчик
+  commentsShown += nextComments.length;
+  updateCommentsCounter();
+
+  // Скрываем кнопку, если все комментарии показаны
+  if (commentsShown >= totalComments) {
+    commentsLoader.classList.add('hidden');
+  }
+}
+
+// Функция для отображения комментариев (с постраничной загрузкой)
+function renderComments() {
+  // Очищаем текущие комментарии
+  socialComments.innerHTML = '';
+
+  // Сбрасываем счетчик
+  commentsShown = 0;
+
+  // Показываем элементы для постраничной загрузки
+  socialCommentCount.classList.remove('hidden');
+  commentsLoader.classList.remove('hidden');
+
+  // Отображаем первую порцию комментариев
+  showNextComments();
+}
+
+// Функция для открытия полноэкранного просмотра
+function openFullscreenViewer(photoId) {
+  // Находим данные фотографии
+  currentPhotoData = findPhotoById(photoId);
+
+  if (!currentPhotoData) {
+    return;
+  }
+
+  // Заполняем данными
+  bigPictureImg.src = currentPhotoData.url;
+  bigPictureImg.alt = currentPhotoData.description;
+  likesCount.textContent = currentPhotoData.likes;
+  commentsCount.textContent = currentPhotoData.comments.length;
+  socialCaption.textContent = currentPhotoData.description;
+
+  // Отображаем комментарии с постраничной загрузкой
+  renderComments();
+
+  // Показываем окно
+  bigPicture.classList.remove('hidden');
+
+  // Добавляем класс для body
+  body.classList.add('modal-open');
+
+  // Фокусируемся на кнопке закрытия для доступности
+  closeButton.focus();
+}
+
+// Функция для закрытия полноэкранного просмотра
+function closeFullscreenViewer() {
+  bigPicture.classList.add('hidden');
+  body.classList.remove('modal-open');
+
+  // Сбрасываем текущие данные
+  currentPhotoData = null;
+  commentsShown = 0;
+}
+
+// Обработчик закрытия по клику на крестик
+function onCloseButtonClick() {
+  closeFullscreenViewer();
+}
+
+// Обработчик закрытия по Escape
+function onDocumentKeydown(evt) {
+  if (evt.key === 'Escape' && !bigPicture.classList.contains('hidden')) {
+    evt.preventDefault();
+    closeFullscreenViewer();
+  }
+}
+
+// Обработчик клика по оверлею
+function onOverlayClick(evt) {
+  if (evt.target === bigPicture) {
+    closeFullscreenViewer();
+  }
+}
+
+// Обработчик клика на кнопку "Загрузить еще"
+function onCommentsLoaderClick() {
+  showNextComments();
+}
+
+// Функция для обработки кликов на миниатюры (вынесена отдельно для лучшей читаемости)
+function onThumbnailClick(evt) {
+  const thumbnail = evt.target.closest('.picture');
+
+  if (thumbnail) {
+    evt.preventDefault();
+    const photoId = thumbnail.dataset.photoId;
+
+    if (photoId) {
+      openFullscreenViewer(photoId);
     }
-  });
-
-  // Скрываем слайдер по умолчанию
-  effectLevel.classList.add('hidden');
-
-  // Обработчик изменения слайдера
-  effectLevelSlider.noUiSlider.on('update', (values) => {
-    const value = values[0];
-    effectLevelValue.value = value;
-    applyEffect(value);
-  });
-}
-
-// Функция обновления масштаба
-function updateScale() {
-  scaleControlValue.value = `${currentScale}%`;
-  imgUploadPreview.style.transform = `scale(${currentScale / 100})`;
-}
-
-// Функция уменьшения масштаба
-function onScaleSmallerClick() {
-  currentScale = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
-  updateScale();
-}
-
-// Функция увеличения масштаба
-function onScaleBiggerClick() {
-  currentScale = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
-  updateScale();
-}
-
-// Функция сброса масштаба
-function resetScaleToDefault() {
-  currentScale = SCALE_DEFAULT;
-  updateScale();
-}
-
-// Функция применения эффекта
-function applyEffect(value) {
-  if (currentEffect === 'none') {
-    imgUploadPreview.style.filter = 'none';
-    effectLevel.classList.add('hidden');
-    return;
-  }
-
-  effectLevel.classList.remove('hidden');
-
-  let filterValue;
-  switch (currentEffect) {
-    case 'chrome':
-      filterValue = `grayscale(${value})`;
-      break;
-    case 'sepia':
-      filterValue = `sepia(${value})`;
-      break;
-    case 'marvin':
-      filterValue = `invert(${value}%)`;
-      break;
-    case 'phobos':
-      filterValue = `blur(${value}px)`;
-      break;
-    case 'heat':
-      filterValue = `brightness(${value})`;
-      break;
-    default:
-      filterValue = 'none';
-  }
-
-  imgUploadPreview.style.filter = filterValue;
-}
-
-// Функция обновления настроек слайдера
-function updateSliderSettings(effect) {
-  if (!effectLevelSlider.noUiSlider) {
-    return;
-  }
-
-  const { min, max, step } = EFFECTS[effect];
-
-  effectLevelSlider.noUiSlider.updateOptions({
-    range: {
-      min,
-      max
-    },
-    start: max,
-    step
-  });
-
-  effectLevelValue.value = max;
-}
-
-// Функция обработки изменения эффекта
-function onEffectChange(evt) {
-  if (!evt.target.matches('input[type="radio"]')) {
-    return;
-  }
-
-  currentEffect = evt.target.value;
-
-  // Сбрасываем масштаб при смене эффекта
-  resetScaleToDefault();
-
-  // Обновляем настройки слайдера
-  updateSliderSettings(currentEffect);
-
-  // Применяем эффект с максимальным значением
-  const { max } = EFFECTS[currentEffect];
-  applyEffect(max);
-}
-
-// Функция для загрузки пользовательской фотографии
-function loadUserPhoto(file) {
-  if (!file || !file.type.startsWith('image/')) {
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = function (evt) {
-    // Устанавливаем загруженное изображение в основное поле предпросмотра
-    imgUploadPreview.src = evt.target.result;
-
-    // Устанавливаем то же изображение для всех превью эффектов
-    effectsPreviews.forEach((preview) => {
-      preview.style.backgroundImage = `url('${evt.target.result}')`;
-    });
-  };
-
-  reader.readAsDataURL(file);
-}
-
-// Функция сброса редактора
-function resetEditor() {
-  // Сбрасываем масштаб
-  resetScaleToDefault();
-
-  // Сбрасываем эффект на "none"
-  const noneEffect = uploadForm.querySelector('#effect-none');
-  if (noneEffect) {
-    noneEffect.checked = true;
-  }
-  currentEffect = 'none';
-
-  // Сбрасываем фильтр
-  imgUploadPreview.style.filter = 'none';
-
-  // Скрываем слайдер
-  effectLevel.classList.add('hidden');
-
-  // Сбрасываем значение слайдера
-  if (effectLevelSlider.noUiSlider) {
-    effectLevelSlider.noUiSlider.updateOptions({
-      range: {
-        min: 0,
-        max: 100
-      },
-      start: 100
-    });
-  }
-
-  // Сбрасываем значение поля
-  effectLevelValue.value = '';
-
-  // Сбрасываем изображение на стандартное
-  imgUploadPreview.src = '';
-
-  // Сбрасываем превью эффектов
-  effectsPreviews.forEach((preview) => {
-    preview.style.backgroundImage = '';
-  });
-}
-
-// Обработчик изменения файла
-function onFileInputChange(evt) {
-  const file = evt.target.files[0];
-
-  if (file) {
-    // Проверяем тип файла
-    if (!file.type.startsWith('image/')) {
-      // Можно добавить отображение ошибки
-      return;
-    }
-
-    // Загружаем фотографию пользователя
-    loadUserPhoto(file);
   }
 }
 
 // Инициализация модуля
-function initImageEditor() {
-  // Инициализируем слайдер
-  initSlider();
+function initFullscreenViewer() {
+  // Добавляем обработчики событий
+  closeButton.addEventListener('click', onCloseButtonClick);
+  document.addEventListener('keydown', onDocumentKeydown);
+  bigPicture.addEventListener('click', onOverlayClick);
+  commentsLoader.addEventListener('click', onCommentsLoaderClick);
 
-  // Устанавливаем начальный масштаб
-  updateScale();
-
-  // Добавляем обработчики для масштабирования
-  scaleControlSmaller.addEventListener('click', onScaleSmallerClick);
-  scaleControlBigger.addEventListener('click', onScaleBiggerClick);
-
-  // Добавляем обработчик для эффектов
-  effectsList.addEventListener('change', onEffectChange);
-
-  // Добавляем обработчик для загрузки файла
-  uploadFileInput.addEventListener('change', onFileInputChange);
-
-  // Инициализируем эффект "none" по умолчанию
-  updateSliderSettings('none');
+  // Добавляем обработчик кликов на миниатюры
+  const picturesContainer = document.querySelector('.pictures');
+  if (picturesContainer) {
+    picturesContainer.addEventListener('click', onThumbnailClick);
+  } else {
+    // Если контейнер еще не загружен, ждем немного и пробуем снова
+    setTimeout(() => {
+      const retryContainer = document.querySelector('.pictures');
+      if (retryContainer) {
+        retryContainer.addEventListener('click', onThumbnailClick);
+      }
+    }, 100);
+  }
 }
 
 // Экспортируем функции
-export { initImageEditor, resetEditor, loadUserPhoto, resetScaleToDefault };
+export { openFullscreenViewer, closeFullscreenViewer, initFullscreenViewer };
