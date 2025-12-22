@@ -186,14 +186,18 @@ function toggleSubmitButton(isDisabled) {
 
 // Функция для открытия формы редактирования
 function openUploadForm(file) {
+    console.log('Вызвана openUploadForm с файлом:', file.name);
   if (!file) {
     return; // Если файла нет, не открываем форму
   }
-
+  console.log(' Пытаюсь вызвать loadUserPhoto...');
   try {
     // Загружаем выбранную пользователем фотографию
     if (typeof loadUserPhoto === 'function') {
       loadUserPhoto(file);
+       console.log(' loadUserPhoto вызвана');
+    } else {
+       console.error('❌ Функция loadUserPhoto НЕ НАЙДЕНА!');
     }
   } catch (error) {
     console.error('Ошибка загрузки фото:', error);
@@ -233,6 +237,7 @@ function openUploadForm(file) {
   setTimeout(() => {
     hashtagInput.focus();
   }, 100);
+   console.log('Класс .hidden должен быть удален с .img-upload__overlay');
 }
 
 // Функция для закрытия формы редактирования
@@ -281,13 +286,15 @@ function closeUploadForm() {
 
 // Обработчик изменения файла
 function onFileInputChange(evt) {
+  console.log('📁 Событие change сработало на input[type=file]');
   const file = evt.target.files[0];
+  console.log('Выбран файл:', file ? file.name : 'ФАЙЛ НЕ ВЫБРАН');
 
   if (file && file.type.startsWith('image/')) {
-    // Открываем форму с выбранным файлом
+    console.log('✅ Файл подходящего типа. Пытаюсь открыть форму...');
     openUploadForm(file);
   } else if (file) {
-    // Неподдерживаемый тип файла - сбрасываем поле
+    console.warn('❌ Неподдерживаемый тип файла:', file.type);
     uploadFileInput.value = '';
   }
 }
