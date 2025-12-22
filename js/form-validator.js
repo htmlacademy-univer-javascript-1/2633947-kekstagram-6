@@ -1,7 +1,6 @@
-// form-validator.js
 import { sendForm } from './api.js';
 import { showSuccessMessage, showErrorMessage } from './messages.js';
-import { resetEditor } from './image-editor.js';
+import { resetEditor, loadUserPhoto } from './image-editor.js';
 
 // Константы
 const MAX_HASHTAGS = 5;
@@ -147,7 +146,12 @@ function toggleSubmitButton(isDisabled) {
 }
 
 // Функция для открытия формы редактирования
-function openUploadForm() {
+function openUploadForm(file) {
+  if (file) {
+    // Загружаем выбранную пользователем фотографию
+    loadUserPhoto(file);
+  }
+
   uploadOverlay.classList.remove('hidden');
   body.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
@@ -180,9 +184,16 @@ function closeUploadForm() {
 }
 
 // Обработчик изменения файла
-function onFileInputChange() {
-  if (uploadFileInput.files && uploadFileInput.files[0]) {
-    openUploadForm();
+function onFileInputChange(evt) {
+  const file = evt.target.files[0];
+
+  if (file && file.type.startsWith('image/')) {
+    // Открываем форму с выбранным файлом
+    openUploadForm(file);
+  } else if (file) {
+    // Можно добавить отображение ошибки для неверного формата
+    console.warn('Выбранный файл не является изображением');
+    uploadFileInput.value = ''; // Сбрасываем поле
   }
 }
 
@@ -198,6 +209,12 @@ async function onFormSubmit(evt) {
   const isValid = pristine.validate();
 
   if (isValid) {
+    // Проверяем, что файл загружен
+    if (!uploadFileInput.files || uploadFileInput.files.length === 0) {
+      // Можно добавить отображение ошибки
+      return;
+    }
+
     // Блокируем кнопку отправки
     toggleSubmitButton(true);
 
@@ -218,7 +235,6 @@ async function onFormSubmit(evt) {
       showErrorMessage();
 
       // Форма остается открытой с сохраненными данными
-      // (как требуется в пункте 3.5)
     } finally {
       // Разблокируем кнопку отправки
       toggleSubmitButton(false);
