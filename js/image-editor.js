@@ -1,4 +1,3 @@
-// Константы
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
@@ -50,7 +49,9 @@ const EFFECTS = {
 
 // Элементы
 const uploadForm = document.querySelector('.img-upload__form');
+const uploadFileInput = uploadForm.querySelector('#upload-file');
 const imgUploadPreview = uploadForm.querySelector('.img-upload__preview img');
+const effectsPreviews = uploadForm.querySelectorAll('.effects__preview');
 const scaleControlValue = uploadForm.querySelector('.scale__control--value');
 const scaleControlSmaller = uploadForm.querySelector('.scale__control--smaller');
 const scaleControlBigger = uploadForm.querySelector('.scale__control--bigger');
@@ -120,7 +121,7 @@ function onScaleBiggerClick() {
 }
 
 // Функция сброса масштаба
-function resetScale() {
+function resetScaleToDefault() {
   currentScale = SCALE_DEFAULT;
   updateScale();
 }
@@ -188,7 +189,7 @@ function onEffectChange(evt) {
   currentEffect = evt.target.value;
 
   // Сбрасываем масштаб при смене эффекта
-  resetScale();
+  resetScaleToDefault();
 
   // Обновляем настройки слайдера
   updateSliderSettings(currentEffect);
@@ -198,10 +199,31 @@ function onEffectChange(evt) {
   applyEffect(max);
 }
 
+// Функция для загрузки пользовательской фотографии
+function loadUserPhoto(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function (evt) {
+    // Устанавливаем загруженное изображение в основное поле предпросмотра
+    imgUploadPreview.src = evt.target.result;
+
+    // Устанавливаем то же изображение для всех превью эффектов
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url('${evt.target.result}')`;
+    });
+  };
+
+  reader.readAsDataURL(file);
+}
+
 // Функция сброса редактора
 function resetEditor() {
   // Сбрасываем масштаб
-  resetScale();
+  resetScaleToDefault();
 
   // Сбрасываем эффект на "none"
   const noneEffect = uploadForm.querySelector('#effect-none');
@@ -229,6 +251,29 @@ function resetEditor() {
 
   // Сбрасываем значение поля
   effectLevelValue.value = '';
+
+  // Сбрасываем изображение на стандартное
+  imgUploadPreview.src = '';
+
+  // Сбрасываем превью эффектов
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = '';
+  });
+}
+
+// Обработчик изменения файла
+function onFileInputChange(evt) {
+  const file = evt.target.files[0];
+
+  if (file) {
+    // Проверяем тип файла
+    if (!file.type.startsWith('image/')) {
+      return;
+    }
+
+    // Загружаем фотографию пользователя
+    loadUserPhoto(file);
+  }
 }
 
 // Инициализация модуля
@@ -246,9 +291,12 @@ function initImageEditor() {
   // Добавляем обработчик для эффектов
   effectsList.addEventListener('change', onEffectChange);
 
+  // Добавляем обработчик для загрузки файла
+  uploadFileInput.addEventListener('change', onFileInputChange);
+
   // Инициализируем эффект "none" по умолчанию
   updateSliderSettings('none');
 }
 
 // Экспортируем функции
-export { initImageEditor, resetEditor };
+export { initImageEditor, resetEditor, loadUserPhoto };

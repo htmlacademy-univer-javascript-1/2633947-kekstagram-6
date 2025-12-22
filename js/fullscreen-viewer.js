@@ -123,8 +123,6 @@ function openFullscreenViewer(photoId) {
   currentPhotoData = findPhotoById(photoId);
 
   if (!currentPhotoData) {
-    // Используем специальную обработку ошибок без console.log
-    // В реальном проекте можно показать сообщение пользователю
     return;
   }
 
@@ -209,6 +207,14 @@ function initFullscreenViewer() {
   const picturesContainer = document.querySelector('.pictures');
   if (picturesContainer) {
     picturesContainer.addEventListener('click', onThumbnailClick);
+  } else {
+    // Если контейнер еще не загружен, ждем немного и пробуем снова
+    setTimeout(() => {
+      const retryContainer = document.querySelector('.pictures');
+      if (retryContainer) {
+        retryContainer.addEventListener('click', onThumbnailClick);
+      }
+    }, 100);
   }
 }
 
