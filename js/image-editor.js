@@ -1,4 +1,3 @@
-// Константы
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
@@ -207,17 +206,17 @@ function loadUserPhoto(file) {
   }
 
   const reader = new FileReader();
-  
+
   reader.onload = function (evt) {
     // Устанавливаем загруженное изображение в основное поле предпросмотра
     imgUploadPreview.src = evt.target.result;
-    
+
     // Устанавливаем то же изображение для всех превью эффектов
     effectsPreviews.forEach((preview) => {
       preview.style.backgroundImage = `url('${evt.target.result}')`;
     });
   };
-  
+
   reader.readAsDataURL(file);
 }
 
@@ -252,10 +251,10 @@ function resetEditor() {
 
   // Сбрасываем значение поля
   effectLevelValue.value = '';
-  
+
   // Сбрасываем изображение на стандартное
   imgUploadPreview.src = '';
-  
+
   // Сбрасываем превью эффектов
   effectsPreviews.forEach((preview) => {
     preview.style.backgroundImage = '';
@@ -265,13 +264,13 @@ function resetEditor() {
 // Обработчик изменения файла
 function onFileInputChange(evt) {
   const file = evt.target.files[0];
-  
+
   if (file) {
     // Проверяем тип файла
     if (!file.type.startsWith('image/')) {
       return;
     }
-    
+
     // Загружаем фотографию пользователя
     loadUserPhoto(file);
   }
@@ -291,7 +290,7 @@ function initImageEditor() {
 
   // Добавляем обработчик для эффектов
   effectsList.addEventListener('change', onEffectChange);
-  
+
   // Добавляем обработчик для загрузки файла
   uploadFileInput.addEventListener('change', onFileInputChange);
 
