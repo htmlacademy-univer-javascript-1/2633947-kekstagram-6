@@ -15,10 +15,19 @@ const uploadCancel = uploadForm.querySelector('#upload-cancel');
 const hashtagInput = uploadForm.querySelector('.text__hashtags');
 const descriptionInput = uploadForm.querySelector('.text__description');
 const submitButton = uploadForm.querySelector('.img-upload__submit');
+const scaleControlValue = uploadForm.querySelector('.scale__control--value');
+const scaleControlSmaller = uploadForm.querySelector('.scale__control--smaller');
+const scaleControlBigger = uploadForm.querySelector('.scale__control--bigger');
 const body = document.body;
 
 // Инициализация Pristine
 let pristine;
+
+// Масштаб
+const SCALE_STEP = 25;
+const SCALE_MIN = 25;
+const SCALE_MAX = 100;
+let currentScale = SCALE_MAX;
 
 // Проверяем доступность Pristine
 if (typeof Pristine === 'undefined') {
@@ -37,6 +46,36 @@ if (typeof Pristine === 'undefined') {
     errorTextTag: 'span',
     errorTextClass: 'img-upload__error'
   }, true);
+}
+
+// Функция обновления масштаба
+function updateScale() {
+  if (scaleControlValue) {
+    scaleControlValue.value = `${currentScale}%`;
+  }
+
+  const previewImg = document.querySelector('.img-upload__preview img');
+  if (previewImg) {
+    previewImg.style.transform = `scale(${currentScale / 100})`;
+  }
+}
+
+// Функция уменьшения масштаба
+function decreaseScale() {
+  currentScale = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
+  updateScale();
+}
+
+// Функция увеличения масштаба
+function increaseScale() {
+  currentScale = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
+  updateScale();
+}
+
+// Функция сброса масштаба
+function resetScale() {
+  currentScale = SCALE_MAX;
+  updateScale();
 }
 
 // Функция для проверки хэш-тегов на уникальность
@@ -147,17 +186,53 @@ function toggleSubmitButton(isDisabled) {
 
 // Функция для открытия формы редактирования
 function openUploadForm(file) {
-  if (file) {
-    // Загружаем выбранную пользователем фотографию
-    loadUserPhoto(file);
+  if (!file) {
+    return; // Если файла нет, не открываем форму
   }
 
+  try {
+    // Загружаем выбранную пользователем фотографию
+    if (typeof loadUserPhoto === 'function') {
+      loadUserPhoto(file);
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки фото:', error);
+    return;
+  }
+
+  // УБЕРИТЕ класс hidden
   uploadOverlay.classList.remove('hidden');
   body.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
 
+  // Сбрасываем масштаб к 100%
+  resetScale();
+
+  // Сбрасываем эффекты к "none"
+  const noneEffect = document.querySelector('#effect-none');
+  if (noneEffect) {
+    noneEffect.checked = true;
+  }
+
+  // Скрываем слайдер эффектов
+  const effectLevel = document.querySelector('.img-upload__effect-level');
+  if (effectLevel) {
+    effectLevel.classList.add('hidden');
+  }
+
+  // Сбрасываем фильтр на изображении
+  const previewImg = document.querySelector('.img-upload__preview img');
+  if (previewImg) {
+    previewImg.style.filter = 'none';
+  }
+
   // Разблокируем кнопку отправки
   toggleSubmitButton(false);
+
+  // Фокусируемся на поле хэштегов для удобства
+  setTimeout(() => {
+    hashtagInput.focus();
+  }, 100);
 }
 
 // Функция для закрытия формы редактирования
@@ -173,6 +248,27 @@ function closeUploadForm() {
   // Сбрасываем редактор изображений
   if (typeof resetEditor === 'function') {
     resetEditor();
+  }
+
+  // Сбрасываем масштаб
+  resetScale();
+
+  // Сбрасываем эффекты
+  const previewImg = document.querySelector('.img-upload__preview img');
+  if (previewImg) {
+    previewImg.style.filter = 'none';
+  }
+
+  // Сбрасываем выбор эффекта
+  const noneEffect = document.querySelector('#effect-none');
+  if (noneEffect) {
+    noneEffect.checked = true;
+  }
+
+  // Скрываем слайдер
+  const effectLevel = document.querySelector('.img-upload__effect-level');
+  if (effectLevel) {
+    effectLevel.classList.add('hidden');
   }
 
   // Особенно важно сбросить значение файлового поля
@@ -191,8 +287,8 @@ function onFileInputChange(evt) {
     // Открываем форму с выбранным файлом
     openUploadForm(file);
   } else if (file) {
-    // Убираем console.warn() и просто сбрасываем поле
-    uploadFileInput.value = ''; // Сбрасываем поле
+    // Неподдерживаемый тип файла - сбрасываем поле
+    uploadFileInput.value = '';
   }
 }
 
@@ -267,8 +363,31 @@ function onDescriptionInputKeydown(evt) {
   }
 }
 
+// Обработчики для кнопок масштаба
+function onScaleSmallerClick() {
+  decreaseScale();
+}
+
+function onScaleBiggerClick() {
+  increaseScale();
+}
+
+// Инициализация контролов масштаба
+function initScaleControls() {
+  if (scaleControlSmaller) {
+    scaleControlSmaller.addEventListener('click', onScaleSmallerClick);
+  }
+
+  if (scaleControlBigger) {
+    scaleControlBigger.addEventListener('click', onScaleBiggerClick);
+  }
+}
+
 // Инициализация модуля
 function initFormValidator() {
+  // Инициализируем контролы масштаба
+  initScaleControls();
+
   // Добавляем обработчики событий
   uploadFileInput.addEventListener('change', onFileInputChange);
   uploadCancel.addEventListener('click', onCancelButtonClick);
@@ -286,7 +405,19 @@ function initFormValidator() {
   descriptionInput.addEventListener('input', () => {
     pristine.validate();
   });
+
+  // Инициализируем масштаб
+  updateScale();
 }
 
 // Экспортируем функции
-export { initFormValidator, closeUploadForm, validateHashtags, validateDescription };
+export {
+  initFormValidator,
+  closeUploadForm,
+  validateHashtags,
+  validateDescription,
+  decreaseScale,
+  increaseScale,
+  resetScale,
+  updateScale
+};

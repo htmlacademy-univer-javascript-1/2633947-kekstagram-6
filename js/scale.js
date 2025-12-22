@@ -1,28 +1,36 @@
+// scale.js
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
-const SCALE_DEFAULT = 100;
 
-let currentScale = SCALE_DEFAULT;
+let currentScale = 100;
 
-function getCurrentScale() {
-  return currentScale;
-}
+function updateScale(value) {
+  currentScale = value;
+  const scaleControl = document.querySelector('.scale__control--value');
+  const previewImg = document.querySelector('.img-upload__preview img');
 
-function setScale(newScale) {
-  currentScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, newScale));
-}
+  if (scaleControl) {
+    scaleControl.value = `${value}%`;
+  }
 
-function increaseScale() {
-  setScale(currentScale + SCALE_STEP);
+  if (previewImg) {
+    previewImg.style.transform = `scale(${value / 100})`;
+  }
 }
 
 function decreaseScale() {
-  setScale(currentScale - SCALE_STEP);
+  const newScale = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
+  updateScale(newScale);
+}
+
+function increaseScale() {
+  const newScale = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
+  updateScale(newScale);
 }
 
 function resetScale() {
-  currentScale = SCALE_DEFAULT;
+  updateScale(SCALE_MAX);
 }
 
-export { getCurrentScale, setScale, increaseScale, decreaseScale, resetScale, SCALE_DEFAULT };
+export { decreaseScale, increaseScale, resetScale, updateScale };
