@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <title>Кекстаграм</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css">
 </head>
 
 <body>
@@ -38,12 +39,7 @@
 
             <!-- Изначальное состояние поля для загрузки изображения -->
             <fieldset class="img-upload__start">
-              <input type="file"
-                     id="upload-file"
-                     class="img-upload__input  visually-hidden"
-                     name="filename"
-                     accept="image/*"
-                     required>
+              <input type="file" id="upload-file" class="img-upload__input  visually-hidden" name="filename" accept="image/*" required>
               <label for="upload-file" class="img-upload__label  img-upload__control">Загрузить</label>
             </fieldset>
 
@@ -61,17 +57,17 @@
 
                   <!-- Предварительный просмотр изображения -->
                   <div class="img-upload__preview">
-                    <img src="" alt="Предварительный просмотр фотографии" class="img-upload__preview-img">
+                    <img src="img/upload-default-image.jpg" alt="Предварительный просмотр фотографии">
                   </div>
 
                   <!-- Изменение глубины эффекта, накладываемого на изображение -->
-                  <fieldset class="img-upload__effect-level  effect-level  hidden">
-                    <input class="effect-level__value" type="number" step="any" name="effect-level" value="100">
+                  <div class="img-upload__effect-level  effect-level  hidden">
+                    <input class="effect-level__value" type="hidden" name="effect-level" value="">
                     <div class="effect-level__slider"></div>
-                  </fieldset>
+                  </div>
 
                   <!-- Кнопка для закрытия формы редактирования изображения -->
-                  <button type="button" class="img-upload__cancel  cancel" id="upload-cancel">Закрыть</button>
+                  <button type="reset" class="img-upload__cancel  cancel" id="upload-cancel">Закрыть</button>
                 </div>
 
                 <!-- Наложение эффекта на изображение -->
@@ -125,12 +121,10 @@
                 <!-- Добавление хэш-тегов и комментария к изображению -->
                 <fieldset class="img-upload__text text">
                   <div class="img-upload__field-wrapper">
-                    <input class="text__hashtags" name="hashtags" placeholder="#ХэшТег" maxlength="140">
-                    <span class="img-upload__error"></span>
+                    <input class="text__hashtags" name="hashtags" placeholder="#ХэшТег" maxlength="100">
                   </div>
                   <div class="img-upload__field-wrapper">
                     <textarea class="text__description" name="description" placeholder="Ваш комментарий..." maxlength="140"></textarea>
-                    <span class="img-upload__error"></span>
                   </div>
                 </fieldset>
 
@@ -167,14 +161,7 @@
           <!-- Комментарии к изображению -->
           <div class="social__comment-count"><span class="social__comment-shown-count">0</span> из <span class="comments-count">125</span> комментариев</div>
           <ul class="social__comments">
-            <li class="social__comment">
-              <img class="social__picture" src="img/avatar-4.svg" alt="Аватар комментатора фотографии" width="35" height="35">
-              <p class="social__text">Мега фото! Просто обалдеть. Как вам так удалось?</p>
-            </li>
-            <li class="social__comment">
-              <img class="social__picture" src="img/avatar-3.svg" alt="Аватар комментатора фотографии" width="35" height="35">
-               <p class="social__text">Да это фоташоп!!!!!!!!</p>
-            </li>
+            <!-- Комментарии будут добавляться динамически -->
           </ul>
 
           <!-- Кнопка для загрузки новой порции комментариев -->
@@ -189,7 +176,7 @@
         </div>
 
         <!-- Кнопка для выхода из полноэкранного просмотра изображения -->
-        <button type="button" class="big-picture__cancel  cancel" id="picture-cancel">Закрыть</button>
+        <button type="reset" class="big-picture__cancel  cancel" id="picture-cancel">Закрыть</button>
       </div>
     </section>
   </main>
@@ -218,34 +205,37 @@
     </a>
   </template>
 
-  <!-- Шаблон сообщения с ошибкой загрузки изображения -->
+  <!-- Сообщение с ошибкой загрузки изображения -->
   <template id="error">
-    <div class="error">
+    <section class="error">
       <div class="error__inner">
         <h2 class="error__title">Ошибка загрузки файла</h2>
-        <button type="button" class="error__button">Попробовать ещё раз</button>
+        <button type="button" class="error__button">Попробовать снова</button>
       </div>
-    </div>
+    </section>
   </template>
 
-  <!-- Шаблон сообщения об успешной загрузке изображения -->
+  <!-- Сообщение об успешной загрузке изображения -->
   <template id="success">
-    <div class="success">
+    <section class="success">
       <div class="success__inner">
         <h2 class="success__title">Изображение успешно загружено</h2>
         <button type="button" class="success__button">Круто!</button>
       </div>
-    </div>
+    </section>
   </template>
 
   <!-- Экран загрузки изображения -->
   <template id="messages">
-    <div class="img-upload__message  img-upload__message--loading">Загружаем...</div>
+    <div class="img-upload__message  img-upload__message--loading">
+      <div class="img-upload__loading">
+        <span class="visually-hidden">Загружаем...</span>
+      </div>
+    </div>
   </template>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pristinejs@0.1.9/dist/pristine.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pristinejs@1.0.0/dist/pristine.min.js"></script>
   <script src="js/main.js" type="module"></script>
 </body>
 </html>

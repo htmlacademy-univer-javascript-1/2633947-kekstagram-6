@@ -44,25 +44,14 @@ function renderThumbnails(photosData, containerSelector = '.pictures') {
     fragment.appendChild(thumbnail);
   });
 
-  // Вставляем все миниатюры в контейнер (перед формой загрузки)
-  const uploadSection = container.querySelector('.img-upload');
-  if (uploadSection) {
-    container.insertBefore(fragment, uploadSection);
-  } else {
-    container.appendChild(fragment);
-  }
+  // Вставляем все миниатюры в контейнер
+  container.appendChild(fragment);
 }
 
 // Основная функция инициализации
 function initThumbnails(photosData = []) {
-  try {
-    // Используем переданные данные или глобальные
-    const dataToRender = photosData.length > 0 ? photosData : (window.loadedPhotosData || []);
-    renderThumbnails(dataToRender);
-  } catch (error) {
-    // Ошибка будет обработана автоматически, без вывода в консоль
-  }
+  renderThumbnails(photosData);
 }
 
 // Экспортируем функции
-export { createThumbnailElement, renderThumbnails, initThumbnails };
+export { initThumbnails };

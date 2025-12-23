@@ -1,4 +1,3 @@
-// messages.js
 const ALERT_SHOW_TIME = 5000;
 
 function showAlert(message) {

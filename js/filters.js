@@ -4,15 +4,13 @@ const RENDER_DELAY = 500;
 const filtersContainer = document.querySelector('.img-filters');
 const filtersForm = document.querySelector('.img-filters__form');
 
-// Переменные состояния
 let currentFilter = 'filter-default';
 let timeoutId = null;
 
 // Функция для получения случайных фотографий
 function getRandomPhotos(photos) {
-  // Перемешиваем массив
-  const shuffledPhotos = [...photos].sort(() => Math.random() - 0.5);
-  // Возвращаем первые 10
+  const photosCopy = [...photos];
+  const shuffledPhotos = photosCopy.sort(() => Math.random() - 0.5);
   return shuffledPhotos.slice(0, RANDOM_PHOTOS_COUNT);
 }
 
@@ -23,18 +21,13 @@ function getMostDiscussedPhotos(photos) {
 
 // Функция для получения отфильтрованных фотографий
 function getFilteredPhotos(photos, filter) {
-  const photosCopy = [...photos];
-
   switch (filter) {
     case 'filter-random':
-      // Случайные 10 фотографий
-      return getRandomPhotos(photosCopy);
+      return getRandomPhotos(photos);
     case 'filter-discussed':
-      // Сортировка по убыванию количества комментариев
-      return getMostDiscussedPhotos(photosCopy);
+      return getMostDiscussedPhotos(photos);
     default:
-      // По умолчанию - исходный порядок
-      return photosCopy;
+      return photos;
   }
 }
 
@@ -55,10 +48,6 @@ function setActiveFilter(filterButton) {
 
 // Функция для отрисовки отфильтрованных фотографий
 function renderFilteredPhotos(photos, renderFunction) {
-  if (typeof renderFunction !== 'function') {
-    return;
-  }
-
   const filteredPhotos = getFilteredPhotos(photos, currentFilter);
   renderFunction(filteredPhotos);
 }
@@ -82,6 +71,10 @@ function showFilters() {
 
 // Инициализация модуля
 function initFilters(photos, renderFunction) {
+  if (!photos || photos.length === 0) {
+    return;
+  }
+
   // Показываем блок фильтров
   showFilters();
 
