@@ -1,53 +1,60 @@
 import { initThumbnails } from './thumbnail-renderer.js';
 import { initFullscreenViewer } from './fullscreen-viewer.js';
 import { initFormValidator } from './form-validator.js';
-import { initImageEditor } from './image-editor.js';
+import { initEffects } from './effects.js';
 import { loadPhotos } from './api.js';
-import { showAlert } from './messages.js';
+import { showAlert } from './message.js';
 import { initFilters } from './filters.js';
-import { renderThumbnails } from './thumbnail-renderer.js';
 
-// Глобальная переменная для хранения загруженных данных
-let photosData = [];
+// Функция для показа сообщения об ошибке загрузки данных
+function showDataError() {
+  const errorContainer = document.createElement('div');
+  errorContainer.classList.add('data-error');
+  errorContainer.style.zIndex = '100';
+  errorContainer.style.position = 'fixed';
+  errorContainer.style.left = '0';
+  errorContainer.style.top = '0';
+  errorContainer.style.right = '0';
+  errorContainer.style.padding = '10px 3px';
+  errorContainer.style.fontSize = '16px';
+  errorContainer.style.textAlign = 'center';
+  errorContainer.style.backgroundColor = 'red';
+  errorContainer.style.color = 'white';
+  errorContainer.textContent = 'Не удалось загрузить фотографии. Проверьте подключение к интернету.';
 
-// Функция для отрисовки миниатюр через фильтры
-function renderPhotosWithFilters(photos) {
-  renderThumbnails(photos);
+  document.body.append(errorContainer);
+
+  // Автоматическое скрытие через 5 секунд
+  setTimeout(() => {
+    if (errorContainer.parentNode) {
+      errorContainer.remove();
+    }
+  }, 5000);
 }
 
-// Загружаем данные с сервера
-async function loadDataFromServer() {
+// Инициализируем все модули
+document.addEventListener('DOMContentLoaded', async () => {
   try {
-    photosData = await loadPhotos();
-    // Сохраняем данные в глобальную переменную для использования другими модулями
-    window.loadedPhotosData = photosData;
+    // Инициализируем базовые модули
+    initFormValidator();
+    initEffects();
+    initFullscreenViewer();
 
-    // Инициализируем отрисовку с загруженными данными
-    if (typeof initThumbnails === 'function') {
-      initThumbnails(photosData);
-    }
+    // Загружаем данные
+    const photos = await loadPhotos();
+
+    // Сохраняем данные в глобальной переменной для доступа из других модулей
+    window.loadedPhotosData = photos;
+
+    // Инициализируем миниатюры
+    initThumbnails(photos);
 
     // Инициализируем фильтры
-    initFilters(photosData, renderPhotosWithFilters);
+    initFilters(photos, initThumbnails);
 
   } catch (error) {
-    showAlert('Не удалось загрузить фотографии. Попробуйте обновить страницу');
-    // Используем пустой массив, чтобы не ломать существующий функционал
-    photosData = [];
-    window.loadedPhotosData = photosData;
+    console.error('Ошибка загрузки данных:', error);
+    // Показываем сообщение об ошибке
+    showDataError();
   }
-}
-
-// Инициализируем все модули при загрузке страницы
-document.addEventListener('DOMContentLoaded', async () => {
-  // Загружаем данные с сервера
-  await loadDataFromServer();
-
-  // Инициализируем остальные модули
-  initFullscreenViewer();
-  initFormValidator();
-  initImageEditor();
 });
-
-// Экспортируем данные для использования в других модулях
-export { photosData };

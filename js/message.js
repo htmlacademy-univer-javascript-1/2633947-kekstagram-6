@@ -1,4 +1,3 @@
-// messages.js
 const ALERT_SHOW_TIME = 5000;
 
 function showAlert(message) {
@@ -53,6 +52,7 @@ function showSuccessMessage() {
   }
 
   function onOutsideClick(evt) {
+    // Клик по любой области вне сообщения закрывает его
     if (!messageElement.contains(evt.target)) {
       closeMessage();
     }
@@ -92,6 +92,7 @@ function showErrorMessage() {
   }
 
   function onOutsideClick(evt) {
+    // Клик по любой области вне сообщения закрывает его
     if (!messageElement.contains(evt.target)) {
       closeMessage();
     }

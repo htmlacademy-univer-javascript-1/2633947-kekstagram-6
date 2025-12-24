@@ -1,28 +1,36 @@
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
-const SCALE_DEFAULT = 100;
 
-let currentScale = SCALE_DEFAULT;
+function updateScale(value) {
+  const scaleControl = document.querySelector('.scale__control--value');
+  const previewImg = document.querySelector('.img-upload__preview img');
 
-function getCurrentScale() {
-  return currentScale;
-}
+  if (scaleControl) {
+    scaleControl.value = `${value}%`;
+  }
 
-function setScale(newScale) {
-  currentScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, newScale));
-}
-
-function increaseScale() {
-  setScale(currentScale + SCALE_STEP);
+  if (previewImg) {
+    previewImg.style.transform = `scale(${value / 100})`;
+  }
 }
 
 function decreaseScale() {
-  setScale(currentScale - SCALE_STEP);
+  const scaleControl = document.querySelector('.scale__control--value');
+  const currentValue = parseInt(scaleControl.value, 10);
+  const newValue = Math.max(currentValue - SCALE_STEP, SCALE_MIN);
+  updateScale(newValue);
+}
+
+function increaseScale() {
+  const scaleControl = document.querySelector('.scale__control--value');
+  const currentValue = parseInt(scaleControl.value, 10);
+  const newValue = Math.min(currentValue + SCALE_STEP, SCALE_MAX);
+  updateScale(newValue);
 }
 
 function resetScale() {
-  currentScale = SCALE_DEFAULT;
+  updateScale(SCALE_MAX);
 }
 
-export { getCurrentScale, setScale, increaseScale, decreaseScale, resetScale, SCALE_DEFAULT };
+export { decreaseScale, increaseScale, resetScale };

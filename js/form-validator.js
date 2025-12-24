@@ -1,6 +1,7 @@
 import { sendForm } from './api.js';
-import { showSuccessMessage, showErrorMessage } from './messages.js';
-import { resetEditor, loadUserPhoto } from './image-editor.js';
+import { showSuccessMessage, showErrorMessage } from './message.js';
+import { resetScale } from './scale.js';
+import { resetEffects } from './effects.js';
 
 // Константы
 const MAX_HASHTAGS = 5;
@@ -15,128 +16,164 @@ const uploadCancel = uploadForm.querySelector('#upload-cancel');
 const hashtagInput = uploadForm.querySelector('.text__hashtags');
 const descriptionInput = uploadForm.querySelector('.text__description');
 const submitButton = uploadForm.querySelector('.img-upload__submit');
+const scaleControlValue = uploadForm.querySelector('.scale__control--value');
+const scaleControlSmaller = uploadForm.querySelector('.scale__control--smaller');
+const scaleControlBigger = uploadForm.querySelector('.scale__control--bigger');
 const body = document.body;
 
 // Инициализация Pristine
 let pristine;
 
-// Проверяем доступность Pristine
-if (typeof Pristine === 'undefined') {
-  // Используем простую валидацию, если Pristine не загружен
-  pristine = {
-    validate: () => true,
-    reset: () => {},
-    addValidator: () => {}
-  };
-} else {
+function initPristine() {
   pristine = new Pristine(uploadForm, {
     classTo: 'img-upload__field-wrapper',
     errorClass: 'img-upload__field-wrapper--invalid',
     successClass: 'img-upload__field-wrapper--valid',
     errorTextParent: 'img-upload__field-wrapper',
-    errorTextTag: 'span',
-    errorTextClass: 'img-upload__error'
-  }, true);
-}
+    errorTextTag: 'div',
+    errorTextClass: 'pristine-error' // Важно: именно pristine-error для тестов
+  }, false); // Отключаем автоматическую валидацию
 
-// Функция для проверки хэш-тегов на уникальность
-function hasUniqueHashtags(hashtags) {
-  const lowerCaseHashtags = hashtags.map((hashtag) => hashtag.toLowerCase());
-  return lowerCaseHashtags.length === new Set(lowerCaseHashtags).size;
-}
+  // Функция для парсинга хэштегов
+  function parseHashtags(value) {
+    return value.trim().split(/\s+/).filter((tag) => tag !== '');
+  }
 
-// Функция для валидации хэш-тегов
-function validateHashtags(value) {
-  // Если поле пустое - валидно
-  if (value.trim() === '') {
+  // Валидаторы для хэштегов
+
+  // 1. Проверка формата хэштегов
+  pristine.addValidator(hashtagInput, (value) => {
+    if (value.trim() === '') {
+      return true;
+    }
+    const hashtags = parseHashtags(value);
+    for (const hashtag of hashtags) {
+      if (!HASHTAG_REGEX.test(hashtag)) {
+        return false;
+      }
+    }
     return true;
-  }
+  }, 'Неправильный формат хэш-тега', 1, false);
 
-  // Разделяем по пробелам и фильтруем пустые строки
-  const hashtags = value.trim().split(/\s+/).filter((tag) => tag !== '');
-
-  // Проверка на максимальное количество
-  if (hashtags.length > MAX_HASHTAGS) {
-    return false;
-  }
-
-  // Проверка каждого хэш-тега на соответствие формату
-  for (const hashtag of hashtags) {
-    if (!HASHTAG_REGEX.test(hashtag)) {
-      return false;
+  // 2. Проверка количества хэштегов
+  pristine.addValidator(hashtagInput, (value) => {
+    if (value.trim() === '') {
+      return true;
     }
-  }
+    const hashtags = parseHashtags(value);
+    return hashtags.length <= MAX_HASHTAGS;
+  }, `Не более ${MAX_HASHTAGS} хэш-тегов`, 2, false);
 
-  // Проверка на уникальность
-  if (!hasUniqueHashtags(hashtags)) {
-    return false;
-  }
-
-  return true;
-}
-
-// Функция для генерации сообщения об ошибке для хэш-тегов
-function getHashtagErrorMessage(value) {
-  if (value.trim() === '') {
-    return '';
-  }
-
-  const hashtags = value.trim().split(/\s+/).filter((tag) => tag !== '');
-
-  if (hashtags.length > MAX_HASHTAGS) {
-    return `Не более ${MAX_HASHTAGS} хэш-тегов`;
-  }
-
-  for (const hashtag of hashtags) {
-    if (!HASHTAG_REGEX.test(hashtag)) {
-      if (!hashtag.startsWith('#')) {
-        return 'Хэш-тег должен начинаться с #';
-      }
-      if (hashtag === '#') {
-        return 'Хэш-тег не может состоять только из #';
-      }
-      if (hashtag.length > 20) {
-        return 'Максимальная длина хэш-тега 20 символов';
-      }
-      if (hashtag.includes('#')) {
-        return 'Хэш-теги разделяются пробелами';
-      }
-      return 'Недопустимые символы в хэш-теге';
+  // 3. Проверка уникальности хэштегов
+  pristine.addValidator(hashtagInput, (value) => {
+    if (value.trim() === '') {
+      return true;
     }
+    const hashtags = parseHashtags(value);
+    const lowerCaseHashtags = hashtags.map((tag) => tag.toLowerCase());
+    return lowerCaseHashtags.length === new Set(lowerCaseHashtags).size;
+  }, 'Хэш-теги не должны повторяться', 3, false);
+
+  // Валидатор для комментария (комментарий не обязателен)
+  pristine.addValidator(descriptionInput, (value) => {
+    return value.length <= MAX_DESCRIPTION_LENGTH;
+  }, `Длина комментария не должна превышать ${MAX_DESCRIPTION_LENGTH} символов`, 1, false);
+}
+
+// Функция для загрузки пользовательского изображения
+function loadUserPhoto(file) {
+  const previewImg = document.querySelector('.img-upload__preview img');
+  const effectPreviews = document.querySelectorAll('.effects__preview');
+
+  if (!previewImg) {
+    return;
   }
 
-  if (!hasUniqueHashtags(hashtags)) {
-    return 'Хэш-теги не должны повторяться';
+  const reader = new FileReader();
+
+  reader.onload = function(evt) {
+    const result = evt.target.result;
+    previewImg.src = result;
+
+    // Обновляем превью эффектов
+    effectPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url(${result})`;
+    });
+  };
+
+  reader.readAsDataURL(file);
+}
+
+// Функция для открытия формы редактирования
+function openUploadForm() {
+  const file = uploadFileInput.files[0];
+
+  if (!file || !file.type.startsWith('image/')) {
+    return;
   }
 
-  return '';
+  // Загружаем изображение пользователя
+  loadUserPhoto(file);
+
+  // Показываем форму
+  uploadOverlay.classList.remove('hidden');
+  body.classList.add('modal-open');
+
+  // Сбрасываем все к исходному состоянию
+  resetForm();
+
+  // Фокусируемся на поле хэштегов для удобства
+  setTimeout(() => {
+    hashtagInput.focus();
+  }, 100);
 }
 
-// Функция для валидации комментария
-function validateDescription(value) {
-  return value.length <= MAX_DESCRIPTION_LENGTH;
+// Функция для сброса формы
+function resetForm() {
+  // Сбрасываем валидацию
+  if (pristine) {
+    pristine.reset();
+  }
+
+  // Сбрасываем масштаб
+  resetScale();
+
+  // Сбрасываем эффекты
+  resetEffects();
+
+  // Сбрасываем поля
+  hashtagInput.value = '';
+  descriptionInput.value = '';
+
+  // Убираем классы ошибок
+  const errorElements = document.querySelectorAll('.pristine-error');
+  errorElements.forEach((el) => el.classList.remove('pristine-error'));
+
+  // Разблокируем кнопку отправки
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
 }
 
-// Функция для генерации сообщения об ошибке для комментария
-function getDescriptionErrorMessage(value) {
-  return value.length > MAX_DESCRIPTION_LENGTH
-    ? `Длина комментария не должна превышать ${MAX_DESCRIPTION_LENGTH} символов`
-    : '';
+// Функция для закрытия формы редактирования
+function closeUploadForm() {
+  uploadOverlay.classList.add('hidden');
+  body.classList.remove('modal-open');
+
+  // Сбрасываем файловый input
+  uploadFileInput.value = '';
+
+  // Сбрасываем форму
+  resetForm();
 }
 
-// Добавляем правила валидации только если Pristine доступен
-if (typeof Pristine !== 'undefined') {
-  pristine.addValidator(
-    hashtagInput,
-    validateHashtags,
-    getHashtagErrorMessage
-  );
+// Обработчик изменения файла
+function onFileInputChange() {
+  openUploadForm();
+}
 
-  pristine.addValidator(
-    descriptionInput,
-    validateDescription,
-    getDescriptionErrorMessage
-  );
+// Обработчик закрытия формы
+function onCancelButtonClick() {
+  closeUploadForm();
 }
 
 // Функция для блокировки/разблокировки кнопки отправки
@@ -145,98 +182,58 @@ function toggleSubmitButton(isDisabled) {
   submitButton.textContent = isDisabled ? 'Отправляю...' : 'Опубликовать';
 }
 
-// Функция для открытия формы редактирования
-function openUploadForm(file) {
-  if (file) {
-    // Загружаем выбранную пользователем фотографию
-    loadUserPhoto(file);
-  }
-
-  uploadOverlay.classList.remove('hidden');
-  body.classList.add('modal-open');
-  document.addEventListener('keydown', onDocumentKeydown);
-
-  // Разблокируем кнопку отправки
-  toggleSubmitButton(false);
-}
-
-// Функция для закрытия формы редактирования
-function closeUploadForm() {
-  uploadOverlay.classList.add('hidden');
-  body.classList.remove('modal-open');
-  document.removeEventListener('keydown', onDocumentKeydown);
-
-  // Сбрасываем форму
-  uploadForm.reset();
-  pristine.reset();
-
-  // Сбрасываем редактор изображений
-  if (typeof resetEditor === 'function') {
-    resetEditor();
-  }
-
-  // Особенно важно сбросить значение файлового поля
-  uploadFileInput.value = '';
-
-  // Разблокируем кнопку отправки
-  toggleSubmitButton(false);
-  submitButton.textContent = 'Опубликовать';
-}
-
-// Обработчик изменения файла
-function onFileInputChange(evt) {
-  const file = evt.target.files[0];
-
-  if (file && file.type.startsWith('image/')) {
-    // Открываем форму с выбранным файлом
-    openUploadForm(file);
-  } else if (file) {
-    // Убираем console.warn() и просто сбрасываем поле
-    uploadFileInput.value = ''; // Сбрасываем поле
-  }
-}
-
-// Обработчик закрытия формы
-function onCancelButtonClick() {
-  closeUploadForm();
-}
-
-// Обработчик отправки формы через AJAX
+// Обработчик отправки формы
 async function onFormSubmit(evt) {
   evt.preventDefault();
 
+  // Проверяем валидность формы
   const isValid = pristine.validate();
 
-  if (isValid) {
-    // Проверяем, что файл загружен
-    if (!uploadFileInput.files || uploadFileInput.files.length === 0) {
-      return;
-    }
+  if (!isValid) {
+    // Показываем все ошибки
+    const errors = pristine.getErrors();
+    console.log('Ошибки валидации:', errors);
+    return;
+  }
 
-    // Блокируем кнопку отправки
-    toggleSubmitButton(true);
+  // Проверяем, что файл загружен
+  if (!uploadFileInput.files || uploadFileInput.files.length === 0) {
+    console.error('Файл не загружен');
+    return;
+  }
 
-    try {
-      const formData = new FormData(evt.target);
+  // Блокируем кнопку отправки
+  toggleSubmitButton(true);
 
-      // Отправляем данные на сервер
-      await sendForm(formData);
+  try {
+    const formData = new FormData(uploadForm);
 
-      // Показываем сообщение об успехе
-      showSuccessMessage();
+    // Добавляем данные о масштабе и эффекте
+    const scaleValue = document.querySelector('.scale__control--value').value;
+    const effectValue = document.querySelector('.effect-level__value').value;
+    const effectName = document.querySelector('input[name="effect"]:checked').value;
 
-      // Закрываем форму и сбрасываем ее
-      closeUploadForm();
+    formData.append('scale', scaleValue);
+    formData.append('effect-level', effectValue);
+    formData.append('effect', effectName);
 
-    } catch (error) {
-      // Показываем сообщение об ошибке
-      showErrorMessage();
+    // Отправляем данные на сервер
+    await sendForm(formData);
 
-      // Форма остается открытой с сохраненными данными
-    } finally {
-      // Разблокируем кнопку отправки
-      toggleSubmitButton(false);
-    }
+    // Показываем сообщение об успехе
+    showSuccessMessage();
+
+    // Закрываем форму (ВАЖНО: форма должна закрываться при успешной отправке)
+    closeUploadForm();
+
+  } catch (error) {
+    console.error('Ошибка отправки формы:', error);
+
+    // Показываем сообщение об ошибке
+    showErrorMessage();
+
+    // Разблокируем кнопку (ВАЖНО: форма НЕ должна закрываться при ошибке)
+    toggleSubmitButton(false);
   }
 }
 
@@ -246,15 +243,25 @@ function onDocumentKeydown(evt) {
     // Проверяем, не находится ли фокус в полях ввода
     const isHashtagFocused = document.activeElement === hashtagInput;
     const isDescriptionFocused = document.activeElement === descriptionInput;
+    const isFormOpen = !uploadOverlay.classList.contains('hidden');
 
-    if (!isHashtagFocused && !isDescriptionFocused) {
+    // Проверяем, открыто ли сообщение об успехе или ошибке
+    const successMessage = document.querySelector('.success');
+    const errorMessage = document.querySelector('.error');
+
+    if (successMessage || errorMessage) {
+      // Если есть сообщения, даем им обработать Escape
+      return;
+    }
+
+    if (isFormOpen && !isHashtagFocused && !isDescriptionFocused) {
       evt.preventDefault();
       closeUploadForm();
     }
   }
 }
 
-// Обработчик для предотвращения закрытия при фокусе в полях
+// Обработчики для предотвращения закрытия при фокусе в полях
 function onHashtagInputKeydown(evt) {
   if (evt.key === 'Escape') {
     evt.stopPropagation();
@@ -267,8 +274,51 @@ function onDescriptionInputKeydown(evt) {
   }
 }
 
+// Обработчики для полей ввода (валидация в реальном времени)
+function onHashtagInput() {
+  if (pristine) {
+    // Проверяем только текущее поле
+    pristine.validate(hashtagInput);
+  }
+}
+
+function onDescriptionInput() {
+  if (pristine) {
+    // Проверяем только текущее поле
+    pristine.validate(descriptionInput);
+  }
+}
+
+// Обработчики для кнопок масштаба
+function onScaleSmallerClick() {
+  const currentValue = parseInt(scaleControlValue.value, 10);
+  const newValue = Math.max(currentValue - 25, 25);
+  scaleControlValue.value = `${newValue}%`;
+
+  // Обновляем изображение
+  const previewImg = document.querySelector('.img-upload__preview img');
+  if (previewImg) {
+    previewImg.style.transform = `scale(${newValue / 100})`;
+  }
+}
+
+function onScaleBiggerClick() {
+  const currentValue = parseInt(scaleControlValue.value, 10);
+  const newValue = Math.min(currentValue + 25, 100);
+  scaleControlValue.value = `${newValue}%`;
+
+  // Обновляем изображение
+  const previewImg = document.querySelector('.img-upload__preview img');
+  if (previewImg) {
+    previewImg.style.transform = `scale(${newValue / 100})`;
+  }
+}
+
 // Инициализация модуля
 function initFormValidator() {
+  // Инициализируем Pristine
+  initPristine();
+
   // Добавляем обработчики событий
   uploadFileInput.addEventListener('change', onFileInputChange);
   uploadCancel.addEventListener('click', onCancelButtonClick);
@@ -276,17 +326,28 @@ function initFormValidator() {
 
   // Обработчики для полей ввода
   hashtagInput.addEventListener('keydown', onHashtagInputKeydown);
+  hashtagInput.addEventListener('input', onHashtagInput);
+  hashtagInput.addEventListener('blur', onHashtagInput);
+
   descriptionInput.addEventListener('keydown', onDescriptionInputKeydown);
+  descriptionInput.addEventListener('input', onDescriptionInput);
+  descriptionInput.addEventListener('blur', onDescriptionInput);
 
-  // Добавляем валидацию при вводе для интерактивности
-  hashtagInput.addEventListener('input', () => {
-    pristine.validate();
-  });
+  // Обработчики для кнопок масштаба
+  if (scaleControlSmaller) {
+    scaleControlSmaller.addEventListener('click', onScaleSmallerClick);
+  }
 
-  descriptionInput.addEventListener('input', () => {
-    pristine.validate();
-  });
+  if (scaleControlBigger) {
+    scaleControlBigger.addEventListener('click', onScaleBiggerClick);
+  }
+
+  // Обработчик для клавиши Escape
+  document.addEventListener('keydown', onDocumentKeydown);
+
+  // Инициализируем масштаб по умолчанию
+  resetScale();
 }
 
 // Экспортируем функции
-export { initFormValidator, closeUploadForm, validateHashtags, validateDescription };
+export { initFormValidator, closeUploadForm, loadUserPhoto };

@@ -5,14 +5,12 @@ const body = document.body;
 // Элементы для заполнения данными
 const bigPictureImg = bigPicture.querySelector('.big-picture__img img');
 const likesCount = bigPicture.querySelector('.likes-count');
-const commentsCount = bigPicture.querySelector('.comments-count');
 const socialComments = bigPicture.querySelector('.social__comments');
 const socialCaption = bigPicture.querySelector('.social__caption');
 
 // Элементы для постраничной загрузки комментариев
 const socialCommentCount = bigPicture.querySelector('.social__comment-count');
 const commentsLoader = bigPicture.querySelector('.comments-loader');
-const commentsShownElement = socialCommentCount.querySelector('.social__comment-shown-count');
 
 // Константы
 const COMMENTS_PER_PAGE = 5;
@@ -57,18 +55,28 @@ function createCommentElement(comment) {
 // Функция для обновления счетчика комментариев
 function updateCommentsCounter() {
   const totalComments = currentPhotoData.comments.length;
-  const commentsShownText = commentsShown > totalComments ? totalComments : commentsShown;
+  const commentsShownText = Math.min(commentsShown, totalComments);
 
-  // Создаем элемент для отображения количества, если его нет
-  if (!commentsShownElement) {
-    const span = document.createElement('span');
-    span.classList.add('social__comment-shown-count');
-    socialCommentCount.innerHTML = '';
-    socialCommentCount.appendChild(document.createTextNode(''));
-    socialCommentCount.appendChild(span);
-    socialCommentCount.appendChild(document.createTextNode(` из ${totalComments} комментариев`));
+  // Ищем или создаем элементы счетчика
+  let commentsShownElement = socialCommentCount.querySelector('.social__comment-shown-count');
+  let commentsTotalElement = socialCommentCount.querySelector('.comments-count');
+
+  // В разметке используется .comments-count для общего количества
+  if (!commentsTotalElement) {
+    commentsTotalElement = socialCommentCount.querySelector('.social__comment-total-count');
+  }
+
+  // Если элементов нет, создаем их
+  if (!commentsShownElement || !commentsTotalElement) {
+    socialCommentCount.innerHTML = `
+      <span class="social__comment-shown-count">${commentsShownText}</span>
+      из
+      <span class="comments-count">${totalComments}</span>
+      комментариев
+    `;
   } else {
     commentsShownElement.textContent = commentsShownText;
+    commentsTotalElement.textContent = totalComments;
   }
 }
 
@@ -98,6 +106,8 @@ function showNextComments() {
   // Скрываем кнопку, если все комментарии показаны
   if (commentsShown >= totalComments) {
     commentsLoader.classList.add('hidden');
+  } else {
+    commentsLoader.classList.remove('hidden');
   }
 }
 
@@ -130,7 +140,6 @@ function openFullscreenViewer(photoId) {
   bigPictureImg.src = currentPhotoData.url;
   bigPictureImg.alt = currentPhotoData.description;
   likesCount.textContent = currentPhotoData.likes;
-  commentsCount.textContent = currentPhotoData.comments.length;
   socialCaption.textContent = currentPhotoData.description;
 
   // Отображаем комментарии с постраничной загрузкой
@@ -181,7 +190,7 @@ function onCommentsLoaderClick() {
   showNextComments();
 }
 
-// Функция для обработки кликов на миниатюры (вынесена отдельно для лучшей читаемости)
+// Функция для обработки кликов на миниатюры
 function onThumbnailClick(evt) {
   const thumbnail = evt.target.closest('.picture');
 
@@ -207,14 +216,6 @@ function initFullscreenViewer() {
   const picturesContainer = document.querySelector('.pictures');
   if (picturesContainer) {
     picturesContainer.addEventListener('click', onThumbnailClick);
-  } else {
-    // Если контейнер еще не загружен, ждем немного и пробуем снова
-    setTimeout(() => {
-      const retryContainer = document.querySelector('.pictures');
-      if (retryContainer) {
-        retryContainer.addEventListener('click', onThumbnailClick);
-      }
-    }, 100);
   }
 }
 
