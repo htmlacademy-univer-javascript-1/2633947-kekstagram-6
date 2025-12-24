@@ -6,6 +6,32 @@ import { loadPhotos } from './api.js';
 import { showAlert } from './message.js';
 import { initFilters } from './filters.js';
 
+// Функция для показа сообщения об ошибке загрузки данных
+function showDataError() {
+  const errorContainer = document.createElement('div');
+  errorContainer.classList.add('data-error');
+  errorContainer.style.zIndex = '100';
+  errorContainer.style.position = 'fixed';
+  errorContainer.style.left = '0';
+  errorContainer.style.top = '0';
+  errorContainer.style.right = '0';
+  errorContainer.style.padding = '10px 3px';
+  errorContainer.style.fontSize = '16px';
+  errorContainer.style.textAlign = 'center';
+  errorContainer.style.backgroundColor = 'red';
+  errorContainer.style.color = 'white';
+  errorContainer.textContent = 'Не удалось загрузить фотографии. Проверьте подключение к интернету.';
+
+  document.body.append(errorContainer);
+
+  // Автоматическое скрытие через 5 секунд
+  setTimeout(() => {
+    if (errorContainer.parentNode) {
+      errorContainer.remove();
+    }
+  }, 5000);
+}
+
 // Инициализируем все модули
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -27,6 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initFilters(photos, initThumbnails);
 
   } catch (error) {
-    showAlert('Не удалось загрузить фотографии. Проверьте подключение к интернету.');
+    console.error('Ошибка загрузки данных:', error);
+    // Показываем сообщение об ошибке
+    showDataError();
   }
 });

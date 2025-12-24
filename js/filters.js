@@ -91,7 +91,7 @@ function initFilters(photos, renderFunction) {
       // Устанавливаем новый активный фильтр
       setActiveFilter(target);
 
-      // Отрисовываем отфильтрованные фотографии
+      // Отрисовываем отфильтрованные фотографиис debounce
       onFilterChange(photos, renderFunction);
     }
   });

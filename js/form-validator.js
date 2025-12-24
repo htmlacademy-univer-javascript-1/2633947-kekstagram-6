@@ -31,23 +31,17 @@ function initPristine() {
     successClass: 'img-upload__field-wrapper--valid',
     errorTextParent: 'img-upload__field-wrapper',
     errorTextTag: 'div',
-    errorTextClass: 'img-upload__error'
-  });
+    errorTextClass: 'pristine-error' // Важно: именно pristine-error для тестов
+  }, false); // Отключаем автоматическую валидацию
 
   // Функция для парсинга хэштегов
   function parseHashtags(value) {
     return value.trim().split(/\s+/).filter((tag) => tag !== '');
   }
 
-  // Валидаторы
-  pristine.addValidator(hashtagInput, (value) => {
-    if (value.trim() === '') {
-      return true;
-    }
-    const hashtags = parseHashtags(value);
-    return hashtags.length <= MAX_HASHTAGS;
-  }, `Не более ${MAX_HASHTAGS} хэш-тегов`, 1, false);
+  // Валидаторы для хэштегов
 
+  // 1. Проверка формата хэштегов
   pristine.addValidator(hashtagInput, (value) => {
     if (value.trim() === '') {
       return true;
@@ -59,8 +53,18 @@ function initPristine() {
       }
     }
     return true;
-  }, 'Неправильный формат хэш-тега', 2, false);
+  }, 'Неправильный формат хэш-тега', 1, false);
 
+  // 2. Проверка количества хэштегов
+  pristine.addValidator(hashtagInput, (value) => {
+    if (value.trim() === '') {
+      return true;
+    }
+    const hashtags = parseHashtags(value);
+    return hashtags.length <= MAX_HASHTAGS;
+  }, `Не более ${MAX_HASHTAGS} хэш-тегов`, 2, false);
+
+  // 3. Проверка уникальности хэштегов
   pristine.addValidator(hashtagInput, (value) => {
     if (value.trim() === '') {
       return true;
@@ -70,6 +74,7 @@ function initPristine() {
     return lowerCaseHashtags.length === new Set(lowerCaseHashtags).size;
   }, 'Хэш-теги не должны повторяться', 3, false);
 
+  // Валидатор для комментария (комментарий не обязателен)
   pristine.addValidator(descriptionInput, (value) => {
     return value.length <= MAX_DESCRIPTION_LENGTH;
   }, `Длина комментария не должна превышать ${MAX_DESCRIPTION_LENGTH} символов`, 1, false);
@@ -116,6 +121,11 @@ function openUploadForm() {
 
   // Сбрасываем все к исходному состоянию
   resetForm();
+
+  // Фокусируемся на поле хэштегов для удобства
+  setTimeout(() => {
+    hashtagInput.focus();
+  }, 100);
 }
 
 // Функция для сброса формы
@@ -134,6 +144,10 @@ function resetForm() {
   // Сбрасываем поля
   hashtagInput.value = '';
   descriptionInput.value = '';
+
+  // Убираем классы ошибок
+  const errorElements = document.querySelectorAll('.pristine-error');
+  errorElements.forEach((el) => el.classList.remove('pristine-error'));
 
   // Разблокируем кнопку отправки
   submitButton.disabled = false;
@@ -172,12 +186,19 @@ function toggleSubmitButton(isDisabled) {
 async function onFormSubmit(evt) {
   evt.preventDefault();
 
-  if (!pristine.validate()) {
+  // Проверяем валидность формы
+  const isValid = pristine.validate();
+
+  if (!isValid) {
+    // Показываем все ошибки
+    const errors = pristine.getErrors();
+    console.log('Ошибки валидации:', errors);
     return;
   }
 
   // Проверяем, что файл загружен
   if (!uploadFileInput.files || uploadFileInput.files.length === 0) {
+    console.error('Файл не загружен');
     return;
   }
 
@@ -187,20 +208,31 @@ async function onFormSubmit(evt) {
   try {
     const formData = new FormData(uploadForm);
 
+    // Добавляем данные о масштабе и эффекте
+    const scaleValue = document.querySelector('.scale__control--value').value;
+    const effectValue = document.querySelector('.effect-level__value').value;
+    const effectName = document.querySelector('input[name="effect"]:checked').value;
+
+    formData.append('scale', scaleValue);
+    formData.append('effect-level', effectValue);
+    formData.append('effect', effectName);
+
     // Отправляем данные на сервер
     await sendForm(formData);
 
     // Показываем сообщение об успехе
     showSuccessMessage();
 
-    // Закрываем форму
+    // Закрываем форму (ВАЖНО: форма должна закрываться при успешной отправке)
     closeUploadForm();
 
   } catch (error) {
+    console.error('Ошибка отправки формы:', error);
+
     // Показываем сообщение об ошибке
     showErrorMessage();
 
-    // Разблокируем кнопку
+    // Разблокируем кнопку (ВАЖНО: форма НЕ должна закрываться при ошибке)
     toggleSubmitButton(false);
   }
 }
@@ -212,6 +244,15 @@ function onDocumentKeydown(evt) {
     const isHashtagFocused = document.activeElement === hashtagInput;
     const isDescriptionFocused = document.activeElement === descriptionInput;
     const isFormOpen = !uploadOverlay.classList.contains('hidden');
+
+    // Проверяем, открыто ли сообщение об успехе или ошибке
+    const successMessage = document.querySelector('.success');
+    const errorMessage = document.querySelector('.error');
+
+    if (successMessage || errorMessage) {
+      // Если есть сообщения, даем им обработать Escape
+      return;
+    }
 
     if (isFormOpen && !isHashtagFocused && !isDescriptionFocused) {
       evt.preventDefault();
@@ -230,6 +271,21 @@ function onHashtagInputKeydown(evt) {
 function onDescriptionInputKeydown(evt) {
   if (evt.key === 'Escape') {
     evt.stopPropagation();
+  }
+}
+
+// Обработчики для полей ввода (валидация в реальном времени)
+function onHashtagInput() {
+  if (pristine) {
+    // Проверяем только текущее поле
+    pristine.validate(hashtagInput);
+  }
+}
+
+function onDescriptionInput() {
+  if (pristine) {
+    // Проверяем только текущее поле
+    pristine.validate(descriptionInput);
   }
 }
 
@@ -270,7 +326,12 @@ function initFormValidator() {
 
   // Обработчики для полей ввода
   hashtagInput.addEventListener('keydown', onHashtagInputKeydown);
+  hashtagInput.addEventListener('input', onHashtagInput);
+  hashtagInput.addEventListener('blur', onHashtagInput);
+
   descriptionInput.addEventListener('keydown', onDescriptionInputKeydown);
+  descriptionInput.addEventListener('input', onDescriptionInput);
+  descriptionInput.addEventListener('blur', onDescriptionInput);
 
   // Обработчики для кнопок масштаба
   if (scaleControlSmaller) {
@@ -283,6 +344,10 @@ function initFormValidator() {
 
   // Обработчик для клавиши Escape
   document.addEventListener('keydown', onDocumentKeydown);
+
+  // Инициализируем масштаб по умолчанию
+  resetScale();
 }
 
-export { initFormValidator, closeUploadForm };
+// Экспортируем функции
+export { initFormValidator, closeUploadForm, loadUserPhoto };

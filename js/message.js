@@ -52,6 +52,7 @@ function showSuccessMessage() {
   }
 
   function onOutsideClick(evt) {
+    // Клик по любой области вне сообщения закрывает его
     if (!messageElement.contains(evt.target)) {
       closeMessage();
     }
@@ -91,6 +92,7 @@ function showErrorMessage() {
   }
 
   function onOutsideClick(evt) {
+    // Клик по любой области вне сообщения закрывает его
     if (!messageElement.contains(evt.target)) {
       closeMessage();
     }

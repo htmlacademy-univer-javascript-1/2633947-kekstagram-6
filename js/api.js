@@ -29,11 +29,21 @@ async function request(url, method = Method.GET, body = null) {
 }
 
 async function loadPhotos() {
-  return request(Route.GET_DATA);
+  try {
+    return await request(Route.GET_DATA);
+  } catch (error) {
+    // Перебрасываем ошибку для обработки в main.js
+    throw error;
+  }
 }
 
 async function sendForm(formData) {
-  return request(Route.SEND_DATA, Method.POST, formData);
+  try {
+    return await request(Route.SEND_DATA, Method.POST, formData);
+  } catch (error) {
+    // Перебрасываем ошибку для обработки в form-validator.js
+    throw error;
+  }
 }
 
 export { loadPhotos, sendForm };
