@@ -4,7 +4,7 @@
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Pristine = factory());
 }(this, (function () { 'use strict';
 
-    var lang = {
+    var lang = { // Объект с локализованными сообщениями об ошибках
         en: {
             required: "This field is required",
             email: "This field requires a valid e-mail address",
@@ -22,12 +22,12 @@
         }
     };
 
-    function findAncestor(el, cls) {
+    function findAncestor(el, cls) { // Находит ближайший родительский элемент с указанным классом
         while ((el = el.parentElement) && !el.classList.contains(cls)) {}
         return el;
     }
 
-    function tmpl(o) {
+    function tmpl(o) { // Шаблонизатор для подстановки значений в строки
         var _arguments = arguments;
 
         return this.replace(/\${([^{}]*)}/g, function (a, b) {
@@ -35,11 +35,11 @@
         });
     }
 
-    function groupedElemCount(input) {
+    function groupedElemCount(input) { // Подсчитывает количество выбранных элементов в группе (radio/checkbox)
         return input.pristine.self.form.querySelectorAll('input[name="' + input.getAttribute('name') + '"]:checked').length;
     }
 
-    function mergeConfig(obj1, obj2) {
+    function mergeConfig(obj1, obj2) { // Объединяет два объекта конфигурации
         for (var attr in obj2) {
             if (!(attr in obj1)) {
                 obj1[attr] = obj2[attr];
@@ -48,7 +48,7 @@
         return obj1;
     }
 
-    var defaultConfig = {
+    var defaultConfig = { // Конфигурация по умолчанию для Pristine
         classTo: 'form-group',
         errorClass: 'has-danger',
         successClass: 'has-success',
@@ -57,62 +57,62 @@
         errorTextClass: 'text-help'
     };
 
-    var PRISTINE_ERROR = 'pristine-error';
-    var SELECTOR = "input:not([type^=hidden]):not([type^=submit]), select, textarea";
-    var ALLOWED_ATTRIBUTES = ["required", "min", "max", 'minlength', 'maxlength', 'pattern'];
-    var EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    var PRISTINE_ERROR = 'pristine-error'; // CSS класс для элементов с ошибками
+    var SELECTOR = "input:not([type^=hidden]):not([type^=submit]), select, textarea"; // Селектор для полей формы
+    var ALLOWED_ATTRIBUTES = ["required", "min", "max", 'minlength', 'maxlength', 'pattern']; // Атрибуты для валидации
+    var EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // Регулярное выражение для email
 
-    var MESSAGE_REGEX = /-message(?:-([a-z]{2}(?:_[A-Z]{2})?))?/; // matches, -message, -message-en, -message-en_US
-    var currentLocale = 'en';
-    var validators = {};
+    var MESSAGE_REGEX = /-message(?:-([a-z]{2}(?:_[A-Z]{2})?))?/; // Регулярное выражение для извлечения локали из атрибутов
+    var currentLocale = 'en'; // Текущая локаль для сообщений об ошибках
+    var validators = {}; // Объект с зарегистрированными валидаторами
 
-    var _ = function _(name, validator) {
+    var _ = function _(name, validator) { // Регистрирует валидатор в системе
         validator.name = name;
         if (validator.priority === undefined) validator.priority = 1;
         validators[name] = validator;
     };
 
-    _('text', { fn: function fn(val) {
+    _('text', { fn: function fn(val) { // Валидатор для текстовых полей (всегда true)
             return true;
         }, priority: 0 });
-    _('required', { fn: function fn(val) {
+    _('required', { fn: function fn(val) { // Валидатор обязательного поля
             return this.type === 'radio' || this.type === 'checkbox' ? groupedElemCount(this) : val !== undefined && val.trim() !== '';
         }, priority: 99, halt: true });
-    _('email', { fn: function fn(val) {
+    _('email', { fn: function fn(val) { // Валидатор email адреса
             return !val || EMAIL_REGEX.test(val);
         } });
-    _('number', { fn: function fn(val) {
+    _('number', { fn: function fn(val) { // Валидатор числового поля
             return !val || !isNaN(parseFloat(val));
         }, priority: 2 });
-    _('integer', { fn: function fn(val) {
+    _('integer', { fn: function fn(val) { // Валидатор целого числа
             return !val || /^\d+$/.test(val);
         } });
-    _('minlength', { fn: function fn(val, length) {
+    _('minlength', { fn: function fn(val, length) { // Валидатор минимальной длины
             return !val || val.length >= parseInt(length);
         } });
-    _('maxlength', { fn: function fn(val, length) {
+    _('maxlength', { fn: function fn(val, length) { // Валидатор максимальной длины
             return !val || val.length <= parseInt(length);
         } });
-    _('min', { fn: function fn(val, limit) {
+    _('min', { fn: function fn(val, limit) { // Валидатор минимального значения
             return !val || (this.type === 'checkbox' ? groupedElemCount(this) >= parseInt(limit) : parseFloat(val) >= parseFloat(limit));
         } });
-    _('max', { fn: function fn(val, limit) {
+    _('max', { fn: function fn(val, limit) { // Валидатор максимального значения
             return !val || (this.type === 'checkbox' ? groupedElemCount(this) <= parseInt(limit) : parseFloat(val) <= parseFloat(limit));
         } });
-    _('pattern', { fn: function fn(val, pattern) {
+    _('pattern', { fn: function fn(val, pattern) { // Валидатор по регулярному выражению
             var m = pattern.match(new RegExp('^/(.*?)/([gimy]*)$'));return !val || new RegExp(m[1], m[2]).test(val);
         } });
-    _('equals', { fn: function fn(val, otherFieldSelector) {
+    _('equals', { fn: function fn(val, otherFieldSelector) { // Валидатор сравнения двух полей
             var other = document.querySelector(otherFieldSelector);return other && (!val && !other.value || other.value === val);
         } });
 
-    function Pristine(form, config, live) {
+    function Pristine(form, config, live) { // Основной конструктор библиотеки Pristine
 
         var self = this;
 
         init(form, config, live);
 
-        function init(form, config, live) {
+        function init(form, config, live) { // Инициализирует Pristine для формы
 
             form.setAttribute("novalidate", "true");
 
@@ -156,7 +156,7 @@
             }.bind(self));
         }
 
-        function _addValidatorToField(fns, params, name, value) {
+        function _addValidatorToField(fns, params, name, value) { // Добавляет валидатор к полю формы
             var validator = validators[name];
             if (validator) {
                 fns.push(validator);
@@ -174,7 +174,7 @@
          * @param silent => do not show error messages, just return true/false
          * @returns {boolean} return true when valid false otherwise
          */
-        self.validate = function (input, silent) {
+        self.validate = function (input, silent) { // Валидирует форму или отдельные поля
             silent = input && silent === true || input === true;
             var fields = self.fields;
             if (input !== true && input !== false) {
@@ -206,7 +206,7 @@
          * @param input
          * @returns {Array|*}
          */
-        self.getErrors = function (input) {
+        self.getErrors = function (input) { // Возвращает ошибки валидации
             if (!input) {
                 var erroneousFields = [];
                 for (var i = 0; i < self.fields.length; i++) {
@@ -230,7 +230,7 @@
          * @returns {boolean}
          * @private
          */
-        function _validateField(field) {
+        function _validateField(field) { // Валидирует одно поле формы
             var errors = [];
             var valid = true;
             for (var i = 0; field.validators[i]; i++) {
@@ -273,7 +273,7 @@
          * @param priority => priority of the validator function, higher valued function gets called first.
          * @param halt => whether validation should stop for this field after current validation function
          */
-        self.addValidator = function (elem, fn, msg, priority, halt) {
+        self.addValidator = function (elem, fn, msg, priority, halt) { // Добавляет кастомный валидатор к элементу
             if (elem instanceof HTMLElement) {
                 elem.pristine.validators.push({ fn: fn, msg: msg, priority: priority, halt: halt });
                 elem.pristine.validators.sort(function (a, b) {
@@ -291,7 +291,7 @@
          * @returns {*}
          * @private
          */
-        function _getErrorElements(field) {
+        function _getErrorElements(field) { // Возвращает элементы для отображения ошибок
             if (field.errorElements) {
                 return field.errorElements;
             }
@@ -315,7 +315,7 @@
             return field.errorElements = [errorClassElement, errorTextElement];
         }
 
-        function _showError(field) {
+        function _showError(field) { // Отображает ошибку валидации
             var errorElements = _getErrorElements(field);
             var errorClassElement = errorElements[0],
                 errorTextElement = errorElements[1];
@@ -344,13 +344,13 @@
          * @param input
          * @param error
          */
-        self.addError = function (input, error) {
+        self.addError = function (input, error) { // Вручную добавляет ошибку к полю
             input = input.length ? input[0] : input;
             input.pristine.errors.push(error);
             _showError(input.pristine);
         };
 
-        function _removeError(field) {
+        function _removeError(field) { // Удаляет отображение ошибки
             var errorElements = _getErrorElements(field);
             var errorClassElement = errorElements[0],
                 errorTextElement = errorElements[1];
@@ -373,7 +373,7 @@
             return errorElements;
         }
 
-        function _showSuccess(field) {
+        function _showSuccess(field) { // Отображает успешную валидацию поля
             var errorClassElement = _removeError(field)[0];
             errorClassElement && errorClassElement.classList.add(self.config.successClass);
         }
@@ -381,7 +381,7 @@
         /***
          * Resets the errors
          */
-        self.reset = function () {
+        self.reset = function () { // Сбрасывает все ошибки и состояния валидации
             for (var i = 0; self.fields[i]; i++) {
                 self.fields[i].errorElements = null;
             }
@@ -397,7 +397,7 @@
         /***
          * Resets the errors and deletes all pristine fields
          */
-        self.destroy = function () {
+        self.destroy = function () { // Полностью уничтожает экземпляр Pristine
             self.reset();
             self.fields.forEach(function (field) {
                 delete field.input.pristine;
@@ -405,7 +405,7 @@
             self.fields = [];
         };
 
-        self.setGlobalConfig = function (config) {
+        self.setGlobalConfig = function (config) { // Устанавливает глобальную конфигурацию
             defaultConfig = config;
         };
 
@@ -421,11 +421,11 @@
      * @param priority => priority of the validator function, higher valued function gets called first.
      * @param halt => whether validation should stop for this field after current validation function
      */
-    Pristine.addValidator = function (name, fn, msg, priority, halt) {
+    Pristine.addValidator = function (name, fn, msg, priority, halt) { // Добавляет глобальный валидатор
         _(name, { fn: fn, msg: msg, priority: priority, halt: halt });
     };
 
-    Pristine.addMessages = function (locale, messages) {
+    Pristine.addMessages = function (locale, messages) { // Добавляет локализованные сообщения об ошибках
         var langObj = lang.hasOwnProperty(locale) ? lang[locale] : lang[locale] = {};
 
         Object.keys(messages).forEach(function (key, index) {
@@ -433,7 +433,7 @@
         });
     };
 
-    Pristine.setLocale = function (locale) {
+    Pristine.setLocale = function (locale) { // Устанавливает текущую локаль
         currentLocale = locale;
     };
 
