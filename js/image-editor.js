@@ -1,254 +1,189 @@
-// Константы
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
 const SCALE_DEFAULT = 100;
 
-const EFFECTS = {
-  none: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: ''
-  },
-  chrome: {
-    filter: 'grayscale',
-    min: 0,
-    max: 1,
-    step: 0.1,
-    unit: ''
-  },
-  sepia: {
-    filter: 'sepia',
-    min: 0,
-    max: 1,
-    step: 0.1,
-    unit: ''
-  },
-  marvin: {
-    filter: 'invert',
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: '%'
-  },
-  phobos: {
-    filter: 'blur',
-    min: 0,
-    max: 3,
-    step: 0.1,
-    unit: 'px'
-  },
-  heat: {
-    filter: 'brightness',
-    min: 1,
-    max: 3,
-    step: 0.1,
-    unit: ''
-  }
-};
+const scaleControl = document.querySelector('.scale__control--value');
+const scaleSmaller = document.querySelector('.scale__control--smaller');
+const scaleBigger = document.querySelector('.scale__control--bigger');
+const imagePreview = document.querySelector('.img-upload__preview img');
 
-// Элементы
-const uploadForm = document.querySelector('.img-upload__form');
-const imgUploadPreview = uploadForm.querySelector('.img-upload__preview img');
-const scaleControlValue = uploadForm.querySelector('.scale__control--value');
-const scaleControlSmaller = uploadForm.querySelector('.scale__control--smaller');
-const scaleControlBigger = uploadForm.querySelector('.scale__control--bigger');
-const effectsList = uploadForm.querySelector('.effects__list');
-const effectLevel = uploadForm.querySelector('.img-upload__effect-level');
-const effectLevelSlider = uploadForm.querySelector('.effect-level__slider');
-const effectLevelValue = uploadForm.querySelector('.effect-level__value');
+const effectLevel = document.querySelector('.img-upload__effect-level');
+const effectLevelValue = document.querySelector('.effect-level__value');
+const effectLevelSlider = document.querySelector('.effect-level__slider');
+const effectsList = document.querySelector('.effects__list');
 
-// Переменные состояния
 let currentScale = SCALE_DEFAULT;
 let currentEffect = 'none';
 
-// Инициализация noUiSlider
-function initSlider() {
+const getEffectSettings = (effectName) => {
+  switch (effectName) {
+    case 'chrome':
+      return { min: 0, max: 1, step: 0.1, unit: '', filter: 'grayscale' };
+    case 'sepia':
+      return { min: 0, max: 1, step: 0.1, unit: '', filter: 'sepia' };
+    case 'marvin':
+      return { min: 0, max: 100, step: 1, unit: '%', filter: 'invert' };
+    case 'phobos':
+      return { min: 0, max: 3, step: 0.1, unit: 'px', filter: 'blur' };
+    case 'heat':
+      return { min: 1, max: 3, step: 0.1, unit: '', filter: 'brightness' };
+    default: // none
+      return { min: 0, max: 100, step: 1, unit: '', filter: 'none' };
+  }
+};
+
+const applyEffect = (value) => {
+  if (currentEffect === 'none') {
+    imagePreview.style.filter = 'none';
+    return;
+  }
+
+  const settings = getEffectSettings(currentEffect);
+  imagePreview.style.filter = `${settings.filter}(${value}${settings.unit})`;
+};
+
+const updateScale = (value) => {
+  currentScale = value;
+
+  scaleControl.value = `${value}%`;
+
+  imagePreview.style.transform = `scale(${value / 100})`;
+};
+
+const onScaleSmallerClick = () => {
+  const newValue = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
+  updateScale(newValue);
+};
+
+const onScaleBiggerClick = () => {
+  const newValue = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
+  updateScale(newValue);
+};
+
+const clearScale = () => {
+  updateScale(SCALE_DEFAULT);
+};
+
+const initScale = () => {
+  scaleSmaller.addEventListener('click', onScaleSmallerClick);
+  scaleBigger.addEventListener('click', onScaleBiggerClick);
+  clearScale();
+};
+
+const initSlider = () => {
+  if (typeof noUiSlider === 'undefined') {
+    return;
+  }
+
   if (!effectLevelSlider) {
+    return;
+  }
+
+  if (effectLevelSlider.noUiSlider) {
     return;
   }
 
   noUiSlider.create(effectLevelSlider, {
     range: {
       min: 0,
-      max: 100
+      max: 100,
     },
     start: 100,
     step: 1,
     connect: 'lower',
     format: {
-      to: function (value) {
-        if (Number.isInteger(value)) {
-          return value.toFixed(0);
+      to: (value) => {
+
+        if (currentEffect === 'chrome' || currentEffect === 'sepia' ||
+            currentEffect === 'phobos' || currentEffect === 'heat') {
+          return Number(value).toFixed(1);
         }
-        return value.toFixed(1);
+
+        return Math.round(value);
       },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
+      from: (value) => parseFloat(value),
+    },
   });
 
-  // Скрываем слайдер по умолчанию
   effectLevel.classList.add('hidden');
 
-  // Обработчик изменения слайдера
-  effectLevelSlider.noUiSlider.on('update', (values) => {
-    const value = values[0];
+  effectLevelSlider.noUiSlider.on('update', () => {
+    const value = effectLevelSlider.noUiSlider.get();
     effectLevelValue.value = value;
     applyEffect(value);
   });
-}
+};
 
-// Функция обновления масштаба
-function updateScale() {
-  scaleControlValue.value = `${currentScale}%`;
-  imgUploadPreview.style.transform = `scale(${currentScale / 100})`;
-}
+const updateSlider = (effectName) => {
+  currentEffect = effectName;
 
-// Функция уменьшения масштаба
-function onScaleSmallerClick() {
-  currentScale = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
-  updateScale();
-}
-
-// Функция увеличения масштаба
-function onScaleBiggerClick() {
-  currentScale = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
-  updateScale();
-}
-
-// Функция сброса масштаба
-function resetScale() {
-  currentScale = SCALE_DEFAULT;
-  updateScale();
-}
-
-// Функция применения эффекта
-function applyEffect(value) {
-  if (currentEffect === 'none') {
-    imgUploadPreview.style.filter = 'none';
+  if (effectName === 'none') {
     effectLevel.classList.add('hidden');
+    imagePreview.style.filter = 'none';
+    effectLevelValue.value = '';
     return;
   }
 
   effectLevel.classList.remove('hidden');
 
-  let filterValue;
-  switch (currentEffect) {
-    case 'chrome':
-      filterValue = `grayscale(${value})`;
-      break;
-    case 'sepia':
-      filterValue = `sepia(${value})`;
-      break;
-    case 'marvin':
-      filterValue = `invert(${value}%)`;
-      break;
-    case 'phobos':
-      filterValue = `blur(${value}px)`;
-      break;
-    case 'heat':
-      filterValue = `brightness(${value})`;
-      break;
-    default:
-      filterValue = 'none';
-  }
-
-  imgUploadPreview.style.filter = filterValue;
-}
-
-// Функция обновления настроек слайдера
-function updateSliderSettings(effect) {
-  if (!effectLevelSlider.noUiSlider) {
-    return;
-  }
-
-  const { min, max, step } = EFFECTS[effect];
+  const settings = getEffectSettings(effectName);
 
   effectLevelSlider.noUiSlider.updateOptions({
     range: {
-      min,
-      max
+      min: settings.min,
+      max: settings.max,
     },
-    start: max,
-    step
+    start: settings.max,
+    step: settings.step,
   });
 
-  effectLevelValue.value = max;
-}
+  effectLevelSlider.noUiSlider.set(settings.max);
+  effectLevelValue.value = settings.max;
 
-// Функция обработки изменения эффекта
-function onEffectChange(evt) {
-  if (!evt.target.matches('input[type="radio"]')) {
-    return;
+  applyEffect(settings.max);
+};
+
+const onEffectChange = (evt) => {
+  if (evt.target.type === 'radio') {
+    updateSlider(evt.target.value);
   }
+};
 
-  currentEffect = evt.target.value;
+const clearEffects = () => {
+  currentEffect = 'none';
+  imagePreview.style.filter = 'none';
+  effectLevel.classList.add('hidden');
+  effectLevelValue.value = '';
 
-  // Сбрасываем масштаб при смене эффекта
-  resetScale();
-
-  // Обновляем настройки слайдера
-  updateSliderSettings(currentEffect);
-
-  // Применяем эффект с максимальным значением
-  const { max } = EFFECTS[currentEffect];
-  applyEffect(max);
-}
-
-// Функция сброса редактора
-function resetEditor() {
-  // Сбрасываем масштаб
-  resetScale();
-
-  // Сбрасываем эффект на "none"
-  const noneEffect = uploadForm.querySelector('#effect-none');
+  const noneEffect = document.querySelector('#effect-none');
   if (noneEffect) {
     noneEffect.checked = true;
   }
-  currentEffect = 'none';
 
-  // Сбрасываем фильтр
-  imgUploadPreview.style.filter = 'none';
-
-  // Скрываем слайдер
-  effectLevel.classList.add('hidden');
-
-  // Сбрасываем значение слайдера
   if (effectLevelSlider.noUiSlider) {
     effectLevelSlider.noUiSlider.updateOptions({
-      range: {
-        min: 0,
-        max: 100
-      },
-      start: 100
+      range: { min: 0, max: 100 },
+      start: 100,
+      step: 1,
     });
   }
+};
 
-  // Сбрасываем значение поля
-  effectLevelValue.value = '';
-}
-
-// Инициализация модуля
-function initImageEditor() {
-  // Инициализируем слайдер
+const initEffects = () => {
   initSlider();
-
-  // Устанавливаем начальный масштаб
-  updateScale();
-
-  // Добавляем обработчики для масштабирования
-  scaleControlSmaller.addEventListener('click', onScaleSmallerClick);
-  scaleControlBigger.addEventListener('click', onScaleBiggerClick);
-
-  // Добавляем обработчик для эффектов
   effectsList.addEventListener('change', onEffectChange);
+  clearEffects();
+};
 
-  // Инициализируем эффект "none" по умолчанию
-  updateSliderSettings('none');
-}
+const initImageEditor = () => {
+  initScale();
+  initEffects();
+};
 
-// Экспортируем функции
-export { initImageEditor, resetEditor };
+const resetImageEditor = () => {
+  clearScale();
+  clearEffects();
+};
+
+export { initImageEditor, resetImageEditor };
