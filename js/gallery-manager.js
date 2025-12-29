@@ -1,13 +1,13 @@
 import { expandImage } from './image-detail-view.js';
 
 // Контейнер для галереи изображений
-const galleryContainer = document.querySelector('.galleryContainer');
+const pictures = document.querySelector('.pictures');
 // Шаблон миниатюры изображения
-const photoThumbnailTemplate = document.querySelector('#picture').content.querySelector('.picture');
+const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
 // Создает DOM-элемент миниатюры изображения
 const renderPicture = (picture)=>{
   const {url, description, comments, likes} = picture; // Деструктуризация данных изображения
-  const pictureElement = photoThumbnailTemplate.cloneNode(true); // Клонирование шаблона
+  const pictureElement = pictureTemplate.cloneNode(true); // Клонирование шаблона
 
   pictureElement.querySelector('.picture__img').src = url;
   pictureElement.querySelector('.picture__img').alt = description;
@@ -28,13 +28,12 @@ const imageRender = (objects)=>{
   for (let i = 0; i < objects.length; i++){
     fragment.appendChild(renderPicture(objects[i]));
   }
-  galleryContainer.appendChild(fragment);
+  pictures.appendChild(fragment);
 };
 
 // Получение всех миниатюр в галерее
-const photos = galleryContainer.getElementsByClassName('picture');
+const photos = pictures.getElementsByClassName('picture');
 
-// Очищает все изображения из галереи
 const clearPictures = ()=>{
   if (photos){
     [...photos].forEach((photo) => photo.remove());
