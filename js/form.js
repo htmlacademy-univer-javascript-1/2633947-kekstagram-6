@@ -1,7 +1,7 @@
 import { validateHashtags, getHashtagErrorMessage } from './hashtags.js';
 import { isEscapeKey } from './util.js';
 import { initImageEditor, resetImageEditor } from './image-editor.js';
-import { uploadData } from './fetch.js';
+import { submitPhotoData } from './fetch.js';
 import { displaySelectedImage, clearPreview } from './image-preview-generator.js';
 
 const MAX_COMMENT_LENGTH = 140;
@@ -219,7 +219,7 @@ const onFormSubmit = (evt) => {
     refreshErrorUI();
   } else {
     blockSubmitButton();
-    uploadData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(form));
+    submitPhotoData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(form));
   }
 };
 

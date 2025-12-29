@@ -1,4 +1,4 @@
-import { loadData } from './fetch.js';
+import { fetchPhotoData } from './fetch.js';
 import { imageRender } from './gallery-manager.js';
 import './image-filter.js';
 import './form.js';
@@ -32,7 +32,7 @@ const onFail = () => {
 };
 
 // Загружаем данные с сервера
-loadData(onSuccess, onFail);
+fetchPhotoData(onSuccess, onFail);
 
 const getPhotos = () => photos.slice();
 

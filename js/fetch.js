@@ -17,12 +17,12 @@ const makeRequest = (onSuccess, onError, method, body) => {
     });
 };
 
-const loadData = (onSuccess, onError, method = 'GET') => {
+const fetchPhotoData = (onSuccess, onError, method = 'GET') => {
   makeRequest(onSuccess, onError, method);
 };
 
-const uploadData = (onSuccess, onError, method = 'POST', body) => {
+const submitPhotoData = (onSuccess, onError, method = 'POST', body) => {
   makeRequest(onSuccess, onError, method, body);
 };
 
-export { loadData, uploadData };
+export { fetchPhotoData, submitPhotoData };
