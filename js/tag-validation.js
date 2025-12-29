@@ -37,7 +37,7 @@ const validateSingleHashtag = (hashtag, seen) => {
   return { isValid: true, error: '' };
 };
 
-const validateHashtags = (value) => {
+const validateHashtagInput = (value) => {
   const hashtags = parseHashtags(value);
   if (hashtags.length > MAX_HASHTAGS) {
     return false;
@@ -47,7 +47,7 @@ const validateHashtags = (value) => {
   return hashtags.every((hashtag) => validateSingleHashtag(hashtag, seen).isValid);
 };
 
-const getHashtagErrorMessage = (value) => {
+const getHashtagValidationError = (value) => {
   const hashtags = parseHashtags(value);
 
   if (hashtags.length > MAX_HASHTAGS) {
@@ -66,4 +66,4 @@ const getHashtagErrorMessage = (value) => {
   return '';
 };
 
-export { validateHashtags, getHashtagErrorMessage };
+export { validateHashtagInput, getHashtagValidationError };

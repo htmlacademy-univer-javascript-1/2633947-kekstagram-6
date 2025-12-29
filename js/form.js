@@ -1,4 +1,4 @@
-import { validateHashtags, getHashtagErrorMessage } from './hashtags.js';
+import { validateHashtagInput, getHashtagValidationError } from './tag-validation.js';
 import { isEscapeKey } from './util.js';
 import { initImageEditor, resetImageEditor } from './image-editor.js';
 import { submitPhotoData } from './api.js';
@@ -66,7 +66,7 @@ const updateSubmitButton = () => {
 
 const validateForm = () => {
   const hashtagValue = hashtagInput.value;
-  hashtagError = validateHashtags(hashtagValue) ? '' : getHashtagErrorMessage(hashtagValue);
+  hashtagError = validateHashtagInput(hashtagValue) ? '' : getHashtagValidationError(hashtagValue);
 
   const commentValue = commentInput.value;
   commentError = validateComment(commentValue) ? '' : `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`;
