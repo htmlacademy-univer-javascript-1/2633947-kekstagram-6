@@ -2,7 +2,7 @@ import { validateHashtags, getHashtagErrorMessage } from './hashtags.js';
 import { isEscapeKey } from './util.js';
 import { initImageEditor, resetImageEditor } from './image-editor.js';
 import { uploadData } from './fetch.js';
-import { displaySelectedImage, clearPreview } from './preview.js';
+import { displaySelectedImage, clearPreview } from './image-preview-generator.js';
 
 const MAX_COMMENT_LENGTH = 140;
 
