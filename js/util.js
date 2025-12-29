@@ -1,27 +1,29 @@
+// Время задержки для устранения дребезга в миллисекундах
 const DEBOUNCE_DELAY = 500;
 
 const isEscapeKey = (evt) => evt.key === 'Escape';
-
-const delayCall = (cb) => {
+// Создает функцию с устранением дребезга
+const delayCall = (callback) => {
   let lastTimeout = null;
 
-  return (...rest) => {
-    if (lastTimeout){
+  return (...args) => {
+    if (lastTimeout) {
       window.clearTimeout(lastTimeout);
     }
-    lastTimeout = window.setTimeout(()=>{
-      cb(...rest);
+    lastTimeout = window.setTimeout(() => {
+      callback(...args);
     }, DEBOUNCE_DELAY);
   };
 };
 
-const shuffleArray = (array) => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+// Перемешивает элементы массива в случайном порядке
+const randomizeArray = (array) => {
+  const shuffledArray = [...array];
+  for (let currentIndex = shuffledArray.length - 1; currentIndex > 0; currentIndex--) {
+    const randomIndex = Math.floor(Math.random() * (currentIndex + 1));
+    [shuffledArray[currentIndex], shuffledArray[randomIndex]] = [shuffledArray[randomIndex], shuffledArray[currentIndex]];
   }
-  return shuffled;
+  return shuffledArray;
 };
 
-export {isEscapeKey,delayCall, shuffleArray};
+export { isEscapeKey, delayCall, randomizeArray };
