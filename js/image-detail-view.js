@@ -48,7 +48,6 @@ const renderComments = () => {
 
   commentsShown += commentsToShow.length;
 
-  // Обновляем только текстовые значения, не меняя структуру
   const shownCountElement = commentCountElement.querySelector('.social__comment-shown-count');
   const totalCountElement = commentCountElement.querySelector('.social__comment-total-count');
 
@@ -78,7 +77,7 @@ const resetComments = () => {
   commentsLoader.classList.remove('hidden');
 };
 
-const openBigPicture = (photo) => {
+const expandImage = (photo) => {
   const { url, likes, comments, description } = photo;
 
   resetComments();
@@ -91,7 +90,6 @@ const openBigPicture = (photo) => {
 
   currentComments = comments;
 
-  // Сначала обновляем счетчики
   const shownCountElement = commentCountElement.querySelector('.social__comment-shown-count');
   const totalCountElement = commentCountElement.querySelector('.social__comment-total-count');
 
@@ -105,7 +103,6 @@ const openBigPicture = (photo) => {
     totalCountElement.textContent = comments.length;
   }
 
-  // Затем рендерим комментарии
   renderComments();
 
   if (comments.length <= COMMENTS_PER_LOAD) {
@@ -138,4 +135,4 @@ commentsLoader.addEventListener('click', onCommentsLoaderClick);
 
 document.addEventListener('keydown', onBigPictureEscKeydown);
 
-export { openBigPicture };
+export { expandImage };
