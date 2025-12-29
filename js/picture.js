@@ -1,4 +1,4 @@
-import { expandImage } from './big-picture.js';
+import { expandImage } from './image-detail-view.js';
 const pictures = document.querySelector('.pictures');
 const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
