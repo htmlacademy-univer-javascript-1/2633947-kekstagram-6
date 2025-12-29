@@ -2,7 +2,7 @@ const DEBOUNCE_DELAY = 500;
 
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-const debounce = (cb) => {
+const delayCall = (cb) => {
   let lastTimeout = null;
 
   return (...rest) => {
@@ -24,4 +24,4 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
-export {isEscapeKey,debounce, shuffleArray};
+export {isEscapeKey,delayCall, shuffleArray};

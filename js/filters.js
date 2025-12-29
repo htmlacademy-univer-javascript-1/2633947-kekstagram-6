@@ -1,5 +1,5 @@
 import { renderPictures, removePictures } from './pictures.js';
-import {debounce, shuffleArray} from './util.js';
+import {delayCall, shuffleArray} from './util.js';
 import {getPhotos} from './main.js';
 
 const FILTER_LIMIT = 10;
@@ -21,7 +21,7 @@ const availableFilters = {
   )
 };
 
-const onImgFilterFormClick = debounce((evt) => {
+const onImgFilterFormClick = delayCall((evt) => {
   if (isButton(evt) && availableFilters[evt.target.id]) {
     removePictures();
     renderPictures(availableFilters[evt.target.id]());
