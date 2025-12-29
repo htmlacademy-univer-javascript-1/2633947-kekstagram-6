@@ -6,7 +6,7 @@ const MAX_HASHTAG_LENGTH = 20;
 const VALID_HASHTAG_CONTENT_PATTERN = /^[A-Za-zА-Яа-яЁё0-9]+$/;
 
 // Разбивает строку на массив хештегов
-const parseHashtags = (inputText) => 
+const parseHashtags = (inputText) =>
   inputText.trim() === '' ? [] : inputText.trim().split(/\s+/).filter((tag) => tag !== '');
 
 // Валидирует один хештег по всем правилам
