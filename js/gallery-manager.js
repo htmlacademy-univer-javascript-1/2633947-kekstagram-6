@@ -35,10 +35,10 @@ const imageRender = (photosCollection)=>{
 const galleryThumbnails = galleryContainer.getElementsByClassName('photoData');
 
 // Очищает все изображения из галереи
-const clearGallery = ()=>{
+const clearPictures = ()=>{
   if (galleryThumbnails){
-    [...galleryThumbnails].forEach((thumbnail) => thumbnail.remove());
+    [...galleryThumbnails].forEach((photo) => photo.remove());
   }
 };
 
-export {imageRender, clearGallery};
+export {imageRender, clearPictures};
