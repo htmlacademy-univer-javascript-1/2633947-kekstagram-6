@@ -1,19 +1,21 @@
-const FILE_TYPES = ['jpg', 'jpeg', 'png'];
+// Массив поддерживаемых форматов изображений
+const SUPPORTED_IMAGE_FORMATS = ['jpg', 'jpeg', 'png'];
+// Основное превью изображения
+const mainImagePreview = document.querySelector('.img-upload__preview img');
+// Превью для эффектов фильтров
+const filterPreviews = document.querySelectorAll('.effects__preview');
 
-const previewImage = document.querySelector('.img-upload__preview img');
-const effectsPreviews = document.querySelectorAll('.effects__preview');
-
-// Показать выбранное изображение
+ // Отображает выбранное пользователем изображение
 const displaySelectedImage = (file) => {
-  const fileName = file.name.toLowerCase();
-  const matches = FILE_TYPES.some((type) => fileName.endsWith(type));
+  const imageFileName = file.name.toLowerCase(); // Приведение имени файла к нижнему регистру
+  const isSupportedFormat = SUPPORTED_IMAGE_FORMATS.some((type) => imageFileName.endsWith(type)); // Проверка формата файла
 
-  if (matches) {
-    const imageUrl = URL.createObjectURL(file);
-    previewImage.src = imageUrl;
+  if (isSupportedFormat) {
+    const imageObjectURL = URL.createObjectURL(file); // Создание URL для файла
+    mainImagePreview.src = imageObjectURL;
 
-    effectsPreviews.forEach((preview) => {
-      preview.style.backgroundImage = `url('${imageUrl}')`;
+    filterPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url('${imageObjectURL}')`;
     });
 
     return true;
@@ -22,12 +24,12 @@ const displaySelectedImage = (file) => {
   return false;
 };
 
-// Сбросить превью на дефолтное
-const clearPreview = () => {
-  previewImage.src = 'img/upload-default-image.jpg';
-  effectsPreviews.forEach((preview) => {
+// Сбрасывает превью к изображению по умолчанию
+const clearImagePreview = () => {
+  mainImagePreview.src = 'img/upload-default-image.jpg';
+  filterPreviews.forEach((preview) => {
     preview.style.backgroundImage = 'url("img/upload-default-image.jpg")';
   });
 };
 
-export { displaySelectedImage, clearPreview };
+export { displaySelectedImage, clearImagePreview };
