@@ -1,5 +1,5 @@
 import { loadData } from './fetch.js';
-import { renderPictures } from './picture.js';
+import { imageRender } from './picture.js';
 import './filters.js';
 import './form.js';
 
@@ -7,7 +7,7 @@ let photos = [];
 
 const onSuccess = (data) => {
   photos = data.slice();
-  renderPictures(photos);
+  imageRender(photos);
   document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 };
 
