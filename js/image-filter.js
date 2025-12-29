@@ -1,43 +1,46 @@
-import { imageRender, clearPictures } from './gallery-manager.js'; // Импорт функций управления галереей
-import { delayCall, randomizeArray } from './util.js'; // Импорт утилитарных функций
-import { getPhotos } from './main.js'; // Импорт функции получения фотографий
+import { imageRender, clearPictures } from './gallery-manager.js';
+import { delayCall, randomizeArray } from './util.js';
+import { getPhotos } from './main.js';
 
-const FILTER_LIMIT = 10; // Максимальное количество фотографий для случайного фильтра
-const ACTIVE_BUTTON_CLASS = 'img-filters__button--active'; // CSS класс активной кнопки фильтра
+const RANDOM_FILTER_LIMIT = 10; // Максимальное количество фотографий для случайного фильтра
+const ACTIVE_FILTER_CLASS = 'img-filters__button--active'; // CSS класс активной кнопки фильтра
 
-const imgFilters = document.querySelector('.img-filters'); // Секция фильтров изображений
-const imgFiltersForm = imgFilters.querySelector('.img-filters__form'); // Форма с кнопками фильтров
+const filterSection = document.querySelector('.img-filters'); // Секция фильтров изображений
+const filterForm = filterSection.querySelector('.img-filters__form'); // Форма с кнопками фильтров
 
-const isButton = (evt) => evt.target.tagName === 'BUTTON'; // Проверяет, является ли элемент кнопкой
+const 	isButtonElement = (evt) => evt.target.tagName === 'BUTTON'; // Проверяет, является ли элемент кнопкой
 
-const availableFilters = { // Объект с доступными фильтрами
-  'filter-default': () => getPhotos(), // Фильтр по умолчанию (все фотографии)
-  'filter-random': () => { // Случайный фильтр
-    const allPhotos = getPhotos(); // Получение всех фотографий
-    const shuffled = randomizeArray(allPhotos); // Перемешивание массива фотографий
-    return shuffled.slice(0, FILTER_LIMIT); // Возврат первых N случайных фотографий
+// Объект с доступными фильтрами
+const filterStrategies = {
+  'filter-default': () => getPhotos(),
+  'filter-random': () => {
+    const fullPhotoCollection = getPhotos(); // Получение всех фотографий
+    const randomizedPhotos = randomizeArray(fullPhotoCollection); // Перемешивание массива фотографий
+    return randomizedPhotos.slice(0, RANDOM_FILTER_LIMIT);
   },
-  'filter-discussed': () => getPhotos().sort((firstElement, secondElement) => // Фильтр по обсуждаемости
-    secondElement.comments.length - firstElement.comments.length // Сортировка по убыванию комментариев
+  'filter-discussed': () => getPhotos().sort((firstElement, secondElement) =>
+    secondElement.comments.length - firstElement.comments.length
   )
 };
 
-const onImgFilterFormClick = delayCall((evt) => { // Обработчик клика по форме фильтров с задержкой
-  if (isButton(evt) && availableFilters[evt.target.id]) { // Проверка клика по кнопке с фильтром
+// Обработчик клика по форме фильтров с задержкой
+const handleFilterSelection = delayCall((evt) => {
+  if (	isButtonElement(evt) && filterStrategies[evt.target.id]) {
     clearPictures(); // Очистка текущих изображений
-    imageRender(availableFilters[evt.target.id]()); // Отрисовка отфильтрованных изображений
+    imageRender(filterStrategies[evt.target.id]());
   }
 });
 
-const onButtonClick = (evt) => { // Обработчик клика для обновления активной кнопки
-  if (isButton(evt) && availableFilters[evt.target.id]) { // Проверка клика по кнопке с фильтром
-    const selectedButton = imgFiltersForm.querySelector(`.${ACTIVE_BUTTON_CLASS}`); // Поиск активной кнопки
-    if (selectedButton) { // Если активная кнопка найдена
-      selectedButton.classList.remove(ACTIVE_BUTTON_CLASS); // Снятие активного класса
+ // Обработчик клика для обновления активной кнопки
+const updateActiveFilterButton = (evt) => {
+  if (	isButtonElement(evt) && filterStrategies[evt.target.id]) {
+    const activeFilterButton = filterForm.querySelector(`.${ACTIVE_FILTER_CLASS}`);
+    if (activeFilterButton) { // Если активная кнопка найдена
+      activeFilterButton.classList.remove(ACTIVE_FILTER_CLASS);
     }
-    evt.target.classList.add(ACTIVE_BUTTON_CLASS); // Добавление активного класса к выбранной кнопке
+    evt.target.classList.add(ACTIVE_FILTER_CLASS);
   }
 };
 
-imgFiltersForm.addEventListener('click', onImgFilterFormClick); // Назначение обработчика фильтрации
-imgFiltersForm.addEventListener('click', onButtonClick); // Назначение обработчика обновления кнопок
+filterForm.addEventListener('click', handleFilterSelection);
+filterForm.addEventListener('click', updateActiveFilterButton);

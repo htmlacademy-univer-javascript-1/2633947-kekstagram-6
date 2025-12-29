@@ -1,11 +1,11 @@
 import { expandImage } from './image-detail-view.js'; // Импорт функции открытия полноэкранного просмотра
 
-const pictures = document.querySelector('.pictures'); // Контейнер для галереи изображений
-const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture'); // Шаблон миниатюры изображения
+const galleryContainer = document.querySelector('.galleryContainer'); // Контейнер для галереи изображений
+const photoThumbnailTemplate = document.querySelector('#picture').content.querySelector('.picture'); // Шаблон миниатюры изображения
 
-const renderPicture = (picture) => { // Создает DOM-элемент миниатюры изображения
+const createPhotoThumbnail = (picture) => { // Создает DOM-элемент миниатюры изображения
   const { url, description, comments, likes } = picture; // Деструктуризация данных изображения
-  const pictureElement = pictureTemplate.cloneNode(true); // Клонирование шаблона
+  const pictureElement = photoThumbnailTemplate.cloneNode(true); // Клонирование шаблона
 
   pictureElement.querySelector('.picture__img').src = url; // Установка URL изображения
   pictureElement.querySelector('.picture__img').alt = description; // Установка альтернативного текста
@@ -13,27 +13,27 @@ const renderPicture = (picture) => { // Создает DOM-элемент мин
   pictureElement.querySelector('.picture__likes').textContent = likes; // Установка количества лайков
 
   pictureElement.addEventListener('click', (evt) => { // Обработчик клика по миниатюре
-    evt.preventDefault(); // Предотвращение стандартного поведения ссылки
-    expandImage(picture); // Открытие полноэкранного просмотра
+    evt.preventDefault();
+    expandImage(picture);
   });
 
-  return pictureElement; // Возврат созданного элемента
+  return pictureElement;
 };
 
 const imageRender = (objects) => { // Отрисовывает коллекцию изображений в галерее
   const fragment = document.createDocumentFragment(); // Создание фрагмента документа
-  for (let i = 0; i < objects.length; i++) { // Итерация по массиву объектов
-    fragment.appendChild(renderPicture(objects[i])); // Добавление миниатюры во фрагмент
+  for (let i = 0; i < objects.length; i++) {
+    fragment.appendChild(createPhotoThumbnail(objects[i]));
   }
-  pictures.appendChild(fragment); // Добавление фрагмента в контейнер галереи
+  galleryContainer.appendChild(fragment);
 };
 
-const photos = pictures.getElementsByClassName('picture'); // Получение всех миниатюр в галерее
+const galleryThumbnails = galleryContainer.getElementsByClassName('picture'); // Получение всех миниатюр в галерее
 
 const clearPictures = () => { // Очищает все изображения из галереи
-  if (photos) { // Проверка наличия миниатюр
-    [...photos].forEach((photo) => photo.remove()); // Удаление каждой миниатюры
+  if (galleryThumbnails) {
+    [...galleryThumbnails].forEach((photo) => photo.remove());
   }
 };
 
-export { imageRender, clearPictures }; // Экспорт функций для использования в других модулях
+export { imageRender, clearPictures };
