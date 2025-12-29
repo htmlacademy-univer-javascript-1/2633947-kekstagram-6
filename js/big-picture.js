@@ -1,6 +1,6 @@
 import { isEscapeKey } from './util.js';
 
-const COMMENTS_TO_LOAD = 5;
+const COMMENTS_PER_LOAD = 5;
 
 const bigPicture = document.querySelector('.big-picture');
 const bigPictureImg = bigPicture.querySelector('.big-picture__img img');
@@ -8,14 +8,14 @@ const likesCount = bigPicture.querySelector('.likes-count');
 const commentsCount = bigPicture.querySelector('.comments-count');
 const socialComments = bigPicture.querySelector('.social__comments');
 const socialCaption = bigPicture.querySelector('.social__caption');
-const pictureCancel = bigPicture.querySelector('.big-picture__cancel');
-const commentCount = bigPicture.querySelector('.social__comment-count');
+const closeButton = bigPicture.querySelector('.big-picture__cancel');
+const commentCountElement = bigPicture.querySelector('.social__comment-count');
 const commentsLoader = bigPicture.querySelector('.comments-loader');
 
 let currentComments = [];
 let commentsShown = 0;
 
-const addComment = (comment) => {
+const createComment = (comment) => {
   const commentElement = document.createElement('li');
   commentElement.classList.add('social__comment');
 
@@ -36,20 +36,21 @@ const addComment = (comment) => {
   return commentElement;
 };
 
-const renderCommentsItem = () => {
-  const visibleComments = currentComments.slice(commentsShown, commentsShown + COMMENTS_TO_LOAD);
+const renderComments = () => {
+  const commentsToShow = currentComments.slice(commentsShown, commentsShown + COMMENTS_PER_LOAD);
 
   const fragment = document.createDocumentFragment();
-  visibleComments.forEach((comment) => {
-    fragment.appendChild(addComment(comment));
+  commentsToShow.forEach((comment) => {
+    fragment.appendChild(createComment(comment));
   });
 
   socialComments.appendChild(fragment);
 
-  commentsShown += visibleComments.length;
+  commentsShown += commentsToShow.length;
 
-  const shownCountElement = commentCount.querySelector('.social__comment-shown-count');
-  const totalCountElement = commentCount.querySelector('.social__comment-total-count');
+  // Обновляем только текстовые значения, не меняя структуру
+  const shownCountElement = commentCountElement.querySelector('.social__comment-shown-count');
+  const totalCountElement = commentCountElement.querySelector('.social__comment-total-count');
 
   if (shownCountElement) {
     shownCountElement.textContent = commentsShown;
@@ -66,21 +67,21 @@ const renderCommentsItem = () => {
   }
 };
 
-const onCommentClick = () => {
-  renderCommentsItem();
+const onCommentsLoaderClick = () => {
+  renderComments();
 };
 
-const clearComment = () => {
+const resetComments = () => {
   socialComments.innerHTML = '';
   commentsShown = 0;
   currentComments = [];
   commentsLoader.classList.remove('hidden');
 };
 
-const openImageDetailView = (photo) => {
+const openBigPicture = (photo) => {
   const { url, likes, comments, description } = photo;
 
-  clearComment();
+  resetComments();
 
   bigPictureImg.src = url;
   bigPictureImg.alt = description;
@@ -90,10 +91,11 @@ const openImageDetailView = (photo) => {
 
   currentComments = comments;
 
-  const shownCountElement = commentCount.querySelector('.social__comment-shown-count');
-  const totalCountElement = commentCount.querySelector('.social__comment-total-count');
+  // Сначала обновляем счетчики
+  const shownCountElement = commentCountElement.querySelector('.social__comment-shown-count');
+  const totalCountElement = commentCountElement.querySelector('.social__comment-total-count');
 
-  const initialShown = Math.min(COMMENTS_TO_LOAD, comments.length);
+  const initialShown = Math.min(COMMENTS_PER_LOAD, comments.length);
 
   if (shownCountElement) {
     shownCountElement.textContent = initialShown;
@@ -103,9 +105,10 @@ const openImageDetailView = (photo) => {
     totalCountElement.textContent = comments.length;
   }
 
-  renderCommentsItem();
+  // Затем рендерим комментарии
+  renderComments();
 
-  if (comments.length <= COMMENTS_TO_LOAD) {
+  if (comments.length <= COMMENTS_PER_LOAD) {
     commentsLoader.classList.add('hidden');
   } else {
     commentsLoader.classList.remove('hidden');
@@ -127,13 +130,12 @@ const onBigPictureEscKeydown = (evt) => {
   }
 };
 
-pictureCancel.addEventListener('click', () => {
+closeButton.addEventListener('click', () => {
   closeBigPicture();
 });
 
-commentsLoader.addEventListener('click', onCommentClick);
+commentsLoader.addEventListener('click', onCommentsLoaderClick);
 
 document.addEventListener('keydown', onBigPictureEscKeydown);
 
-export { openImageDetailView };
-
+export { openBigPicture };

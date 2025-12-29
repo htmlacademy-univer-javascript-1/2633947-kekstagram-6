@@ -1,6 +1,6 @@
-const MAX_TAGS = 5;
-const MAX_TAG_LENGTH = 20;
-const TAG_CONTENT_PATTERN = /^[A-Za-zА-Яа-яЁё0-9]+$/;
+const MAX_HASHTAGS = 5;
+const MAX_HASHTAG_LENGTH = 20;
+const HASHTAG_CONTENT_PATTERN = /^[A-Za-zА-Яа-яЁё0-9]+$/;
 
 const parseHashtags = (value) =>
   value.trim() === '' ? [] : value.trim().split(/\s+/).filter((tag) => tag !== '');
@@ -16,8 +16,8 @@ const validateSingleHashtag = (hashtag, seen) => {
     return { isValid: false, error: 'Хэш-тег не может состоять только из решётки' };
   }
 
-  if (hashtag.length > MAX_TAG_LENGTH) {
-    return { isValid: false, error: `Максимальная длина хэш-тега - ${MAX_TAG_LENGTH} символов (включая #)` };
+  if (hashtag.length > MAX_HASHTAG_LENGTH) {
+    return { isValid: false, error: `Максимальная длина хэш-тега - ${MAX_HASHTAG_LENGTH} символов (включая #)` };
   }
 
   const content = hashtag.substring(1);
@@ -25,7 +25,7 @@ const validateSingleHashtag = (hashtag, seen) => {
     return { isValid: false, error: 'Хэш-тег не может состоять только из решётки' };
   }
 
-  if (!TAG_CONTENT_PATTERN.test(content)) {
+  if (!HASHTAG_CONTENT_PATTERN.test(content)) {
     return { isValid: false, error: 'Хэш-тег должен содержать только буквы и цифры' };
   }
 
@@ -37,9 +37,9 @@ const validateSingleHashtag = (hashtag, seen) => {
   return { isValid: true, error: '' };
 };
 
-const tagValidation = (value) => {
+const validateHashtags = (value) => {
   const hashtags = parseHashtags(value);
-  if (hashtags.length > MAX_TAGS) {
+  if (hashtags.length > MAX_HASHTAGS) {
     return false;
   }
 
@@ -47,11 +47,11 @@ const tagValidation = (value) => {
   return hashtags.every((hashtag) => validateSingleHashtag(hashtag, seen).isValid);
 };
 
-const getTagErrorMessage = (value) => {
+const getHashtagErrorMessage = (value) => {
   const hashtags = parseHashtags(value);
 
-  if (hashtags.length > MAX_TAGS) {
-    return `Не более ${MAX_TAGS} хэш-тегов`;
+  if (hashtags.length > MAX_HASHTAGS) {
+    return `Не более ${MAX_HASHTAGS} хэш-тегов`;
   }
 
   const seen = new Set();
@@ -66,4 +66,4 @@ const getTagErrorMessage = (value) => {
   return '';
 };
 
-export { tagValidation, getTagErrorMessage };
+export { validateHashtags, getHashtagErrorMessage };

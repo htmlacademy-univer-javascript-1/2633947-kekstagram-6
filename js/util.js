@@ -1,21 +1,21 @@
-const INPUT_DELAY_MS = 500;
+const DEBOUNCE_DELAY = 500;
 
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-const delayCall = (cb) => {
-  let currentTimeout = null;
+const debounce = (cb) => {
+  let lastTimeout = null;
 
   return (...rest) => {
-    if (currentTimeout){
-      window.clearTimeout(currentTimeout);
+    if (lastTimeout){
+      window.clearTimeout(lastTimeout);
     }
-    currentTimeout = window.setTimeout(()=>{
+    lastTimeout = window.setTimeout(()=>{
       cb(...rest);
-    }, INPUT_DELAY_MS);
+    }, DEBOUNCE_DELAY);
   };
 };
 
-const randomizeArray = (array) => {
+const shuffleArray = (array) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -24,4 +24,4 @@ const randomizeArray = (array) => {
   return shuffled;
 };
 
-export {isEscapeKey,delayCall, randomizeArray};
+export {isEscapeKey,debounce, shuffleArray};

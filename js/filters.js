@@ -1,4 +1,4 @@
-import {imageRenders, iclearPictures} from './gallery-maneger.js';
+import { renderPictures, removePictures } from './pictures.js';
 import {debounce, shuffleArray} from './util.js';
 import {getPhotos} from './main.js';
 
@@ -23,8 +23,8 @@ const availableFilters = {
 
 const onImgFilterFormClick = debounce((evt) => {
   if (isButton(evt) && availableFilters[evt.target.id]) {
-    iclearPictures();
-    imageRenders(availableFilters[evt.target.id]());
+    removePictures();
+    renderPictures(availableFilters[evt.target.id]());
   }
 });
 

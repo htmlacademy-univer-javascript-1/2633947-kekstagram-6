@@ -6,7 +6,7 @@ const SCALE_DEFAULT = 100;
 const scaleControl = document.querySelector('.scale__control--value');
 const scaleSmaller = document.querySelector('.scale__control--smaller');
 const scaleBigger = document.querySelector('.scale__control--bigger');
-const previewImage = document.querySelector('.img-upload__preview img');
+const imagePreview = document.querySelector('.img-upload__preview img');
 
 const effectLevel = document.querySelector('.img-upload__effect-level');
 const effectLevelValue = document.querySelector('.effect-level__value');
@@ -16,7 +16,7 @@ const effectsList = document.querySelector('.effects__list');
 let currentScale = SCALE_DEFAULT;
 let currentEffect = 'none';
 
-const getEffectsSetting = (effectName) => {
+const getEffectSettings = (effectName) => {
   switch (effectName) {
     case 'chrome':
       return { min: 0, max: 1, step: 0.1, unit: '', filter: 'grayscale' };
@@ -33,14 +33,14 @@ const getEffectsSetting = (effectName) => {
   }
 };
 
-const executeEffect = (value) => {
+const applyEffect = (value) => {
   if (currentEffect === 'none') {
-    previewImage.style.filter = 'none';
+    imagePreview.style.filter = 'none';
     return;
   }
 
-  const settings = getEffectsSetting(currentEffect);
-  previewImage.style.filter = `${settings.filter}(${value}${settings.unit})`;
+  const settings = getEffectSettings(currentEffect);
+  imagePreview.style.filter = `${settings.filter}(${value}${settings.unit})`;
 };
 
 const updateScale = (value) => {
@@ -48,7 +48,7 @@ const updateScale = (value) => {
 
   scaleControl.value = `${value}%`;
 
-  previewImage.style.transform = `scale(${value / 100})`;
+  imagePreview.style.transform = `scale(${value / 100})`;
 };
 
 const onScaleSmallerClick = () => {
@@ -111,7 +111,7 @@ const initSlider = () => {
   effectLevelSlider.noUiSlider.on('update', () => {
     const value = effectLevelSlider.noUiSlider.get();
     effectLevelValue.value = value;
-    executeEffect(value);
+    applyEffect(value);
   });
 };
 
@@ -120,14 +120,14 @@ const updateSlider = (effectName) => {
 
   if (effectName === 'none') {
     effectLevel.classList.add('hidden');
-    previewImage.style.filter = 'none';
+    imagePreview.style.filter = 'none';
     effectLevelValue.value = '';
     return;
   }
 
   effectLevel.classList.remove('hidden');
 
-  const settings = getEffectsSetting(effectName);
+  const settings = getEffectSettings(effectName);
 
   effectLevelSlider.noUiSlider.updateOptions({
     range: {
@@ -141,7 +141,7 @@ const updateSlider = (effectName) => {
   effectLevelSlider.noUiSlider.set(settings.max);
   effectLevelValue.value = settings.max;
 
-  executeEffect(settings.max);
+  applyEffect(settings.max);
 };
 
 const onEffectChange = (evt) => {
@@ -152,7 +152,7 @@ const onEffectChange = (evt) => {
 
 const clearEffects = () => {
   currentEffect = 'none';
-  previewImage.style.filter = 'none';
+  imagePreview.style.filter = 'none';
   effectLevel.classList.add('hidden');
   effectLevelValue.value = '';
 
@@ -176,7 +176,7 @@ const initEffects = () => {
   clearEffects();
 };
 
-const initializateImageEditor = () => {
+const initImageEditor = () => {
   initScale();
   initEffects();
 };
@@ -186,4 +186,4 @@ const resetImageEditor = () => {
   clearEffects();
 };
 
-export { initializateImageEditor, resetImageEditor };
+export { initImageEditor, resetImageEditor };

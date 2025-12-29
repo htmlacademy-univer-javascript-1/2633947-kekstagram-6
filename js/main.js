@@ -1,16 +1,17 @@
-import { loadData } from './api.js';
-import { imageRender } from './gallery-maneger.js';
+import { loadData } from './fetch.js';
+import { renderPictures } from './pictures.js';
 import './filters.js';
-import './upload-form-manager.js';
+import './form.js';
 
 let photos = [];
 
 const onSuccess = (data) => {
   photos = data.slice();
-  imageRender(photos);
+  renderPictures(photos);
   document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 };
 
+// Функция ошибки загрузки
 const onFail = () => {
   const messageAlert = document.createElement('div');
   messageAlert.className = 'data-error';
@@ -30,6 +31,7 @@ const onFail = () => {
   document.body.append(messageAlert);
 };
 
+// Загружаем данные с сервера
 loadData(onSuccess, onFail);
 
 const getPhotos = () => photos.slice();
