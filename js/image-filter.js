@@ -5,7 +5,7 @@ import {getPhotos} from './main.js';
 // Максимальное количество фотографий для случайного фильтра
 const RANDOM_FILTER_LIMIT = 10;
 // CSS класс активной кнопки фильтра
-const ACTIVE_BUTTON_CLASS = 'img-filters__button--active';
+const ACTIVE_FILTER_CLASS = 'img-filters__button--active';
 // Секция фильтров изображений
 const filterSection = document.querySelector('.img-filters');
 // Форма с кнопками фильтров
@@ -25,22 +25,22 @@ const filterStrategies = {
   )
 };
  // Обработчик клика по форме фильтров с задержкой
-const onImgFilterFormClick = delayCall((evt) => {
+const handleFilterSelection = delayCall((evt) => {
   if (isButtonElement(evt) && filterStrategies[evt.target.id]) {
     clearPictures();
     imageRender(filterStrategies[evt.target.id]());
   }
 });
 // Обработчик клика для обновления активной кнопки
-const onButtonClick = (evt) => {
+const updateActiveFilterButton = (evt) => {
   if (isButtonElement(evt) && filterStrategies[evt.target.id]) {
-    const selectedButton = filterForm.querySelector(`.${ACTIVE_BUTTON_CLASS}`);
+    const selectedButton = filterForm.querySelector(`.${ACTIVE_FILTER_CLASS}`);
     if (selectedButton) {
-      selectedButton.classList.remove(ACTIVE_BUTTON_CLASS);
+      selectedButton.classList.remove(ACTIVE_FILTER_CLASS);
     }
-    evt.target.classList.add(ACTIVE_BUTTON_CLASS);
+    evt.target.classList.add(ACTIVE_FILTER_CLASS);
   }
 };
 
-filterForm.addEventListener('click', onImgFilterFormClick); // Назначение обработчика фильтрации
-filterForm.addEventListener('click', onButtonClick); // Назначение обработчика обновления кнопок
+filterForm.addEventListener('click', handleFilterSelection); // Назначение обработчика фильтрации
+filterForm.addEventListener('click', updateActiveFilterButton); // Назначение обработчика обновления кнопок
