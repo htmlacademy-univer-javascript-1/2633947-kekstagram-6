@@ -23,7 +23,7 @@ const availableFilters = {
 
 const onImgFilterFormClick = debounce((evt) => {
   if (isButton(evt) && availableFilters[evt.target.id]) {
-    iclearPictures();
+    clearPictures();
     imageRenders(availableFilters[evt.target.id]());
   }
 });
