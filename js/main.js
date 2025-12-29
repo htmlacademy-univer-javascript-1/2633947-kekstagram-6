@@ -1,55 +1,43 @@
-// Импорт модулей приложения
-import { fetchPhotoData } from './api.js/index.js';
-import { displayPhotoGallery } from './gallery-manager.js';
-import './image-filter-engine.js';
+import { fetchPhotoData } from './api.js';
+import { imageRender } from './gallery-manager.js';
+import './image-filter.js';
 import './upload-form-manager.js';
 
+// Массив для хранения загруженных фотографий
+let photos = [];
 
-//Глобальное хранилище фотографий приложения
-let photoCollection = [];
-
-
-const handleDataLoadSuccess = (loadedPhotos) => {
-  // Сохраняем копию данных в локальное хранилище
-  photoCollection = loadedPhotos.slice(); // slice() создает копию массива для неизменяемости оригинальных данных
-
-  // Отрисовываем фотографии на странице
-  displayPhotoGallery(photoCollection);
-
-  // Фильтры скрыты по умолчанию до загрузки данных
+// Обработчик успешной загрузки данных
+const onSuccess = (data) => {
+  photos = data.slice();
+  imageRender(photos);
   document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 };
 
-
-const handleDataLoadError = () => {
-  // Создаем элемент для отображения сообщения об ошибке
-  const errorNotification = document.createElement('div');
-
-  // Настройка CSS стилей для сообщения об ошибке
-  errorNotification.className = 'data-error'; // CSS класс для дополнительного стилирования
-  errorNotification.style.position = 'fixed';  // Фиксированное позиционирование
-  errorNotification.style.top = '20px';       // Отступ сверху
-  errorNotification.style.left = '50%';       // Центрирование по горизонтали
-  errorNotification.style.transform = 'translateX(-50%)'; // Точное центрирование
-  errorNotification.style.backgroundColor = '#ee3939ff'; // Красный цвет фона
-  errorNotification.style.color = 'white';    // Белый цвет текста
-  errorNotification.style.padding = '30px 50px'; // Внутренние отступы
-  errorNotification.style.borderRadius = '8px'; // Закругленные углы
-  errorNotification.style.zIndex = '10000';   // Высокий z-index поверх всех элементов
-  errorNotification.style.textAlign = 'center'; // Центрирование текста
-  errorNotification.style.fontSize = '20px';  // Размер шрифта
-  errorNotification.style.fontFamily = 'Arial, sans-serif'; // Шрифт
-  errorNotification.textContent = 'Ошибка загрузки фотографий!'; // Текст сообщения
-
-  // Добавляем сообщение в DOM
-  document.body.append(errorNotification);
+// Обработчик ошибки загрузки данных
+const onFail = () => {
+  const messageAlert = document.createElement('div');
+  messageAlert.className = 'data-error';
+  messageAlert.style.position = 'fixed';
+  messageAlert.style.top = '20px';
+  messageAlert.style.left = '50%';
+  messageAlert.style.transform = 'translateX(-50%)';
+  messageAlert.style.backgroundColor = '#ee3939ff';
+  messageAlert.style.color = 'white';
+  messageAlert.style.padding = '30px 50px';
+  messageAlert.style.borderRadius = '8px';
+  messageAlert.style.zIndex = '10000';
+  messageAlert.style.textAlign = 'center';
+  messageAlert.style.fontSize = '20px';
+  messageAlert.style.fontFamily = 'Arial, sans-serif';
+  messageAlert.textContent = 'Ошибка загрузки фотографий!';
+  document.body.append(messageAlert);
 };
 
+// Инициализация загрузки данных приложения
+fetchPhotoData(onSuccess, onFail);
 
-//Инициализация приложения - загрузка данных при старте
-fetchPhotoData(handleDataLoadSuccess, handleDataLoadError);
+// Функция получения копии массива фотографий
+const getPhotos = () => photos.slice();
 
-const getPhotoCollection = () => photoCollection.slice();
+export { getPhotos };
 
-// Экспорт функции
-export { getPhotoCollection };
