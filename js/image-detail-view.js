@@ -77,8 +77,8 @@ const resetComments = () => { // Сбрасывает состояние ком�
   commentsLoadButton.classList.remove('hidden');
 };
 
-const expandImage = (photo) => { // Открывает модальное окно с изображением
-  const { url, likes, comments, description } = photo;
+const expandImage = (selectedPhotoData) => { // Открывает модальное окно с изображением
+  const { url, likes, comments, description } = selectedPhotoData;
 
   resetComments();
 
@@ -115,24 +115,24 @@ const expandImage = (photo) => { // Открывает модальное окн
   document.body.classList.add('modal-open');
 };
 
-const closeBigPicture = () => { // Закрывает модальное окно
+const closeFullscreenView = () => { // Закрывает модальное окно
   fullscreenModal.classList.add('hidden');
   document.body.classList.remove('modal-open');
 };
 
-const onBigPictureEscKeydown = (evt) => { // Обработчик нажатия клавиши Escape
+const handleModalEscKey = (evt) => { // Обработчик нажатия клавиши Escape
   if (isEscapeKey(evt) && !fullscreenModal.classList.contains('hidden')) {
     evt.preventDefault();
-    closeBigPicture();
+    closeFullscreenView();
   }
 };
 
 modalCloseButton.addEventListener('click', () => { // Обработчик клика по кнопке закрытия
-  closeBigPicture();
+  closeFullscreenView();
 });
 
 commentsLoadButton.addEventListener('click', oncommentsLoadButtonClick); // Назначение обработчика кнопки загрузки
 
-document.addEventListener('keydown', onBigPictureEscKeydown); // Назначение обработчика клавиатуры
+document.addEventListener('keydown', handleModalEscKey); // Назначение обработчика клавиатуры
 
-export { expandImage }; // Экспорт функции открытия изображения
+export { expandImage };
