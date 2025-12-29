@@ -8,7 +8,7 @@ const MAXIMUM_SCALE_VALUE = 100;
 const DEFAULT_SCALE_VALUE = 100;
 
 // Поле отображения значения масштаба
-const scaleValueDisplay = document.querySelector('.scale__control--intensityValue');
+const scaleValueDisplay = document.querySelector('.scale__control--value');
 // Кнопка уменьшения масштаба
 const scaleDecreaseButton = document.querySelector('.scale__control--smaller');
 // Кнопка увеличения масштаба
@@ -49,7 +49,7 @@ const getEffectConfiguration = (effectType) => {
 };
 
 // Применяет выбранный эффект к изображению
-const applyVisualEffect = (intensityValue) => {
+const applyVisualEffect = (value) => {
   if (selectedEffect === 'none') {
     editableImagePreview.style.filter = 'none';
     return;
@@ -57,16 +57,16 @@ const applyVisualEffect = (intensityValue) => {
 
   // Получение настроек текущего эффекта
   const effectConfiguration = getEffectConfiguration(selectedEffect);
-  editableImagePreview.style.filter = `${effectConfiguration.filter}(${intensityValue}${effectConfiguration.unit})`;
+  editableImagePreview.style.filter = `${effectConfiguration.filter}(${value}${effectConfiguration.unit})`;
 };
 
 // Обновляет масштаб изображения
-const updateImageScale = (intensityValue) => {
-  currentScaleValue = intensityValue;
+const updateImageScale = (value) => {
+  currentScaleValue = value;
 
-  scaleValueDisplay.intensityValue = `${intensityValue}%`;
+  scaleValueDisplay.value = `${value}%`;
 
-  editableImagePreview.style.transform = `scale(${intensityValue / 100})`;
+  editableImagePreview.style.transform = `scale(${value / 100})`;
 };
 
  // Обработчик клика по кнопке уменьшения масштаба
@@ -117,25 +117,25 @@ const initializeEffectSlider = () => {
     step: 1,
     connect: 'lower',
     format: {
-      to: (intensityValue) => {
+      to: (value) => {
 
         if (selectedEffect === 'chrome' || selectedEffect === 'sepia' ||
             selectedEffect === 'phobos' || selectedEffect === 'heat') {
-          return Number(intensityValue).toFixed(1);
+          return Number(value).toFixed(1);
         }
 
-        return Math.round(intensityValue);
+        return Math.round(value);
       },
-      from: (intensityValue) => parseFloat(intensityValue),
+      from: (value) => parseFloat(value),
     },
   });
 
   effectIntensityContainer.classList.add('hidden');
 
   effectIntensitySlider.noUiSlider.on('update', () => {
-    const intensityValue = effectIntensitySlider.noUiSlider.get();
-    effectIntensityValue.intensityValue = intensityValue;
-    applyVisualEffect(intensityValue);
+    const value = effectIntensitySlider.noUiSlider.get();
+    effectIntensityValue.value = value;
+    applyVisualEffect(value);
   });
 };
 
@@ -146,7 +146,7 @@ const updateSlider = (effectType) => {
   if (effectType === 'none') {
     effectIntensityContainer.classList.add('hidden');
     editableImagePreview.style.filter = 'none';
-    effectIntensityValue.intensityValue = '';
+    effectIntensityValue.value = '';
     return;
   }
 
@@ -164,7 +164,7 @@ const updateSlider = (effectType) => {
   });
 
   effectIntensitySlider.noUiSlider.set(effectConfiguration.max);
-  effectIntensityValue.intensityValue = effectConfiguration.max;
+  effectIntensityValue.value = effectConfiguration.max;
 
   applyVisualEffect(effectConfiguration.max);
 };
@@ -172,7 +172,7 @@ const updateSlider = (effectType) => {
 // Обработчик изменения выбора эффекта
 const onEffectChange = (evt) => {
   if (evt.target.type === 'radio') {
-    updateSlider(evt.target.intensityValue);
+    updateSlider(evt.target.value);
   }
 };
 
@@ -181,7 +181,7 @@ const resetVisualEffects = () => {
   selectedEffect = 'none';
   editableImagePreview.style.filter = 'none';
   effectIntensityContainer.classList.add('hidden');
-  effectIntensityValue.intensityValue = '';
+  effectIntensityValue.value = '';
 
   const noneEffect = document.querySelector('#effect-none');
   if (noneEffect) {
