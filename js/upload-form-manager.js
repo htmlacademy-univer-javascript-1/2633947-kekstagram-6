@@ -72,13 +72,13 @@ const updateValidationUI = () => {
   }
 };
 // Обновляет состояние кнопки отправки
-const updateSubmitButton = () => {
+const updateFormSubmitButton = () => {
   const isValid = !hashtagValidationError && !commentValidationError;
   formSubmitButton.disabled = !isValid;
   formSubmitButton.textContent = 'Опубликовать';
 };
 // Валидирует всю форму
-const validateForm = () => {
+const validateUploadForm = () => {
   const hashtagValue = hashtagField.value;
   hashtagValidationError = validateHashtagInput(hashtagValue) ? '' : getHashtagValidationError(hashtagValue);
 
@@ -86,18 +86,18 @@ const validateForm = () => {
   const commentValue = commentField.value;
   commentValidationError = validateCommentLength(commentValue) ? '' : `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`;
   updateValidationUI();
-  updateSubmitButton();
+  updateFormSubmitButton();
 };
 
 // Блокирует кнопку отправки
-const blockSubmitButton = () => {
+const disableFormSubmission = () => {
   formSubmitButton.disabled = true;
   formSubmitButton.textContent = 'Отправляется...';
 };
 
 // Разблокирует кнопку отправки
 const unblockSubmitButton = () => {
-  updateSubmitButton();
+  updateFormSubmitButton();
 };
 
 // Сбрасывает форму загрузки
@@ -114,7 +114,7 @@ const resetUploadForm = () => {
   hashtagValidationError = '';
   commentValidationError = '';
   updateValidationUI();
-  updateSubmitButton();
+  updateFormSubmitButton();
 };
 
 // Закрывает модальное окно загрузки
@@ -134,7 +134,7 @@ function onImageEditorOpen() {
   document.addEventListener('keydown', onDocumentKeydown);
 
   initializeImageEditor();
-  updateSubmitButton();
+  updateFormSubmitButton();
 }
 
 // Обработчик нажатия клавиш
@@ -242,24 +242,24 @@ const onFormSubmitError = () => {
 const onFormSubmit = (evt) => {
   evt.preventDefault();
 
-  validateForm();
+  validateUploadForm();
 
   if (hashtagValidationError || commentValidationError) {
     updateValidationUI();
   } else {
-    blockSubmitButton();
+    disableFormSubmission();
     submitPhotoData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(uploadForm));
   }
 };
 
 // Обработчик ввода в поле хештегов
 const onHashtagInput = () => {
-  validateForm();
+  validateUploadForm();
 };
 
 // Обработчик ввода в поле комментария
 const onCommentInput = () => {
-  validateForm();
+  validateUploadForm();
 };
 
 // Обработчик нажатия клавиш в поле хештегов
