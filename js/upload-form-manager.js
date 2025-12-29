@@ -30,21 +30,21 @@ let hashtagValidationError = '';
 let commentValidationError = '';
 
 // Проверяет длину комментария
-const validateCommentLength = (value) => value.length <= MAX_COMMENT_LENGTH;
+const validateComment = (value) => value.length <= MAX_COMMENT_LENGTH;
 
 // Обновляет интерфейс отображения ошибок
-const updateValidationUI = () => {
-  const hashtagContainer = hashtagField.closest('.img-upload__field-wrapper'); // Контейнер поля хештегов
-  if (hashtagContainer) {
-    hashtagContainer.classList.toggle('img-upload__field-wrapper--error', !!hashtagValidationError);
+const refreshErrorUI = () => {
+  const hashtagWrapper = hashtagField.closest('.img-upload__field-wrapper'); // Контейнер поля хештегов
+  if (hashtagWrapper) {
+    hashtagWrapper.classList.toggle('img-upload__field-wrapper--error', !!hashtagValidationError);
 
-    let errorElement = hashtagContainer.querySelector('.pristine-error');
+    let errorElement = hashtagWrapper.querySelector('.pristine-error');
 
     if (hashtagValidationError) {
       errorElement = errorElement || document.createElement('div');
-      if (!hashtagContainer.querySelector('.pristine-error')) {
+      if (!hashtagWrapper.querySelector('.pristine-error')) {
         errorElement.className = 'pristine-error';
-        hashtagContainer.appendChild(errorElement);
+        hashtagWrapper.appendChild(errorElement);
       }
       errorElement.textContent = hashtagValidationError;
     } else if (errorElement) {
@@ -53,17 +53,17 @@ const updateValidationUI = () => {
   }
 
   // Контейнер поля комментария
-  const commentContainer = commentField.closest('.img-upload__field-wrapper');
-  if (commentContainer) {
-    commentContainer.classList.toggle('img-upload__field-wrapper--error', !!commentValidationError);
+  const commentWrapper = commentField.closest('.img-upload__field-wrapper');
+  if (commentWrapper) {
+    commentWrapper.classList.toggle('img-upload__field-wrapper--error', !!commentValidationError);
 
-    let errorElement = commentContainer.querySelector('.pristine-error');
+    let errorElement = commentWrapper.querySelector('.pristine-error');
 
     if (commentValidationError) {
       errorElement = errorElement || document.createElement('div');
-      if (!commentContainer.querySelector('.pristine-error')) {
+      if (!commentWrapper.querySelector('.pristine-error')) {
         errorElement.className = 'pristine-error';
-        commentContainer.appendChild(errorElement);
+        commentWrapper.appendChild(errorElement);
       }
       errorElement.textContent = commentValidationError;
     } else if (errorElement) {
@@ -72,7 +72,7 @@ const updateValidationUI = () => {
   }
 };
 // Обновляет состояние кнопки отправки
-const updateFormSubmitButton = () => {
+const updateSubmitButton = () => {
   const isValid = !hashtagValidationError && !commentValidationError;
   formSubmitButton.disabled = !isValid;
   formSubmitButton.textContent = 'Опубликовать';
@@ -84,9 +84,9 @@ const validateForm = () => {
 
   // Получение значения комментария
   const commentValue = commentField.value;
-  commentValidationError = validateCommentLength(commentValue) ? '' : `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`;
-  updateValidationUI();
-  updateFormSubmitButton();
+  commentValidationError = validateComment(commentValue) ? '' : `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`;
+  refreshErrorUI();
+  updateSubmitButton();
 };
 
 // Блокирует кнопку отправки
@@ -97,7 +97,7 @@ const blockSubmitButton = () => {
 
 // Разблокирует кнопку отправки
 const unblockSubmitButton = () => {
-  updateFormSubmitButton();
+  updateSubmitButton();
 };
 
 // Сбрасывает форму загрузки
@@ -113,8 +113,8 @@ const resetUploadForm = () => {
 
   hashtagValidationError = '';
   commentValidationError = '';
-  updateValidationUI();
-  updateFormSubmitButton();
+  refreshErrorUI();
+  updateSubmitButton();
 };
 
 // Закрывает модальное окно загрузки
@@ -134,7 +134,7 @@ function onImageEditorOpen() {
   document.addEventListener('keydown', onDocumentKeydown);
 
   initializeImageEditor();
-  updateFormSubmitButton();
+  updateSubmitButton();
 }
 
 // Обработчик нажатия клавиш
@@ -245,7 +245,7 @@ const onFormSubmit = (evt) => {
   validateForm();
 
   if (hashtagValidationError || commentValidationError) {
-    updateValidationUI();
+    refreshErrorUI();
   } else {
     blockSubmitButton();
     submitPhotoData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(uploadForm));
