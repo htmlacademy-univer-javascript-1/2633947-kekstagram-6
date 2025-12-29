@@ -1,6 +1,6 @@
 import { loadData } from './fetch.js';
 import { imageRender } from './gallery-manager.js';
-import './filters.js';
+import './image-filter.js';
 import './form.js';
 
 let photos = [];
