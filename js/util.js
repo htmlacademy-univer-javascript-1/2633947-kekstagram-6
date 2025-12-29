@@ -1,9 +1,8 @@
-// Время задержки для устранения дребезга в миллисекундах
-const DEBOUNCE_DELAY = 500;
+const DEBOUNCE_DELAY = 500; // Время задержки для устранения дребезга в миллисекундах
 
-const isEscapeKey = (evt) => evt.key === 'Escape';
-// Создает функцию с устранением дребезга
-const delayCall = (callback) => {
+const isEscapeKey = (evt) => evt.key === 'Escape'; // Проверяет нажатие клавиши Escape
+
+const delayCall = (callback) => { // Создает функцию с устранением дребезга
   let lastTimeout = null;
 
   return (...args) => {
@@ -16,8 +15,7 @@ const delayCall = (callback) => {
   };
 };
 
-// Перемешивает элементы массива в случайном порядке
-const randomizeArray = (array) => {
+const randomizeArray = (array) => { // Перемешивает элементы массива в случайном порядке
   const shuffledArray = [...array];
   for (let currentIndex = shuffledArray.length - 1; currentIndex > 0; currentIndex--) {
     const randomIndex = Math.floor(Math.random() * (currentIndex + 1));
@@ -26,4 +24,4 @@ const randomizeArray = (array) => {
   return shuffledArray;
 };
 
-export { isEscapeKey, delayCall, randomizeArray };
+export { isEscapeKey, delayCall, randomizeArray }; // Экспорт функций для использования в других модулях

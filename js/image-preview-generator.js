@@ -1,35 +1,31 @@
-// Массив поддерживаемых форматов изображений
-const SUPPORTED_IMAGE_FORMATS = ['jpg', 'jpeg', 'png'];
-// Основное превью изображения
-const mainImagePreview = document.querySelector('.img-upload__preview img');
-// Превью для эффектов фильтров
-const filterPreviews = document.querySelectorAll('.effects__preview');
+const FILE_TYPES = ['jpg', 'jpeg', 'png']; // Массив поддерживаемых форматов изображений
 
- // Отображает выбранное пользователем изображение
-const displaySelectedImage = (file) => {
-  const imageFileName = file.name.toLowerCase(); // Приведение имени файла к нижнему регистру
-  const isSupportedFormat = SUPPORTED_IMAGE_FORMATS.some((type) => imageFileName.endsWith(type)); // Проверка формата файла
+const previewImage = document.querySelector('.img-upload__preview img'); // Основное превью изображения
+const effectsPreviews = document.querySelectorAll('.effects__preview'); // Превью для эффектов фильтров
 
-  if (isSupportedFormat) {
-    const imageObjectURL = URL.createObjectURL(file); // Создание URL для файла
-    mainImagePreview.src = imageObjectURL;
+const displaySelectedImage = (file) => { // Отображает выбранное пользователем изображение
+  const fileName = file.name.toLowerCase(); // Приведение имени файла к нижнему регистру
+  const matches = FILE_TYPES.some((type) => fileName.endsWith(type)); // Проверка формата файла
 
-    filterPreviews.forEach((preview) => {
-      preview.style.backgroundImage = `url('${imageObjectURL}')`;
+  if (matches) { // Если формат поддерживается
+    const imageUrl = URL.createObjectURL(file); // Создание URL для файла
+    previewImage.src = imageUrl; // Установка изображения в основное превью
+
+    effectsPreviews.forEach((preview) => { // Обновление превью для всех эффектов
+      preview.style.backgroundImage = `url('${imageUrl}')`; // Установка фонового изображения
     });
 
-    return true;
+    return true; // Успешное отображение
   }
 
-  return false;
+  return false; // Неподдерживаемый формат
 };
 
-// Сбрасывает превью к изображению по умолчанию
-const clearPreview = () => {
-  mainImagePreview.src = 'img/upload-default-image.jpg';
-  filterPreviews.forEach((preview) => {
-    preview.style.backgroundImage = 'url("img/upload-default-image.jpg")';
+const clearPreview = () => { // Сбрасывает превью к изображению по умолчанию
+  previewImage.src = 'img/upload-default-image.jpg'; // Восстановление основного превью
+  effectsPreviews.forEach((preview) => { // Сброс превью для всех эффектов
+    preview.style.backgroundImage = 'url("img/upload-default-image.jpg")'; // Восстановление фонового изображения
   });
 };
 
-export { displaySelectedImage, clearPreview };
+export { displaySelectedImage, clearPreview }; // Экспорт функций для использования в других модулях

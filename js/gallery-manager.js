@@ -1,43 +1,39 @@
-import { expandImage } from './image-detail-view.js';
+import { expandImage } from './image-detail-view.js'; // Импорт функции открытия полноэкранного просмотра
 
-// Контейнер для галереи изображений
-const pictures = document.querySelector('.pictures');
-// Шаблон миниатюры изображения
-const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
-// Создает DOM-элемент миниатюры изображения
-const renderPicture = (picture)=>{
-  const {url, description, comments, likes} = picture; // Деструктуризация данных изображения
+const pictures = document.querySelector('.pictures'); // Контейнер для галереи изображений
+const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture'); // Шаблон миниатюры изображения
+
+const renderPicture = (picture) => { // Создает DOM-элемент миниатюры изображения
+  const { url, description, comments, likes } = picture; // Деструктуризация данных изображения
   const pictureElement = pictureTemplate.cloneNode(true); // Клонирование шаблона
 
-  pictureElement.querySelector('.picture__img').src = url;
-  pictureElement.querySelector('.picture__img').alt = description;
-  pictureElement.querySelector('.picture__comments').textContent = comments.length;
-  pictureElement.querySelector('.picture__likes').textContent = likes;
+  pictureElement.querySelector('.picture__img').src = url; // Установка URL изображения
+  pictureElement.querySelector('.picture__img').alt = description; // Установка альтернативного текста
+  pictureElement.querySelector('.picture__comments').textContent = comments.length; // Установка количества комментариев
+  pictureElement.querySelector('.picture__likes').textContent = likes; // Установка количества лайков
 
-  pictureElement.addEventListener('click', (evt) => {
-    evt.preventDefault();
-    expandImage(picture);
+  pictureElement.addEventListener('click', (evt) => { // Обработчик клика по миниатюре
+    evt.preventDefault(); // Предотвращение стандартного поведения ссылки
+    expandImage(picture); // Открытие полноэкранного просмотра
   });
 
-  return pictureElement;
+  return pictureElement; // Возврат созданного элемента
 };
 
-// Отрисовывает коллекцию изображений в галерее
-const imageRender = (objects)=>{
-  const fragment = document.createDocumentFragment();
-  for (let i = 0; i < objects.length; i++){
-    fragment.appendChild(renderPicture(objects[i]));
+const imageRender = (objects) => { // Отрисовывает коллекцию изображений в галерее
+  const fragment = document.createDocumentFragment(); // Создание фрагмента документа
+  for (let i = 0; i < objects.length; i++) { // Итерация по массиву объектов
+    fragment.appendChild(renderPicture(objects[i])); // Добавление миниатюры во фрагмент
   }
-  pictures.appendChild(fragment);
+  pictures.appendChild(fragment); // Добавление фрагмента в контейнер галереи
 };
 
-// Получение всех миниатюр в галерее
-const photos = pictures.getElementsByClassName('picture');
+const photos = pictures.getElementsByClassName('picture'); // Получение всех миниатюр в галерее
 
-const clearPictures = ()=>{
-  if (photos){
-    [...photos].forEach((photo) => photo.remove());
+const clearPictures = () => { // Очищает все изображения из галереи
+  if (photos) { // Проверка наличия миниатюр
+    [...photos].forEach((photo) => photo.remove()); // Удаление каждой миниатюры
   }
 };
 
-export {imageRender, clearPictures};
+export { imageRender, clearPictures }; // Экспорт функций для использования в других модулях

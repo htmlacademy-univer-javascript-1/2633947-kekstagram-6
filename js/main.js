@@ -1,42 +1,37 @@
-import { fetchPhotoData } from './api.js';
-import { imageRender } from './gallery-manager.js';
-import './image-filter.js';
-import './upload-form-manager.js';
+import { fetchPhotoData } from './api.js'; // Импорт функции загрузки данных с сервера
+import { imageRender } from './gallery-manager.js'; // Импорт функции отрисовки галереи
+import './image-filter.js'; // Импорт модуля фильтрации изображений
+import './upload-form-manager.js'; // Импорт модуля управления формой загрузки
 
-// Массив для хранения загруженных фотографий
-let photos = [];
+let photos = []; // Массив для хранения загруженных фотографий
 
-// Обработчик успешной загрузки данных
-const onSuccess = (data) => {
-  photos = data.slice();
-  imageRender(photos);
-  document.querySelector('.img-filters').classList.remove('img-filters--inactive');
+const onSuccess = (data) => { // Обработчик успешной загрузки данных
+  photos = data.slice(); // Сохранение копии данных
+  imageRender(photos); // Отрисовка фотографий в галерее
+  document.querySelector('.img-filters').classList.remove('img-filters--inactive'); // Активация фильтров
 };
 
-// Обработчик ошибки загрузки данных
-const onFail = () => {
-  const messageAlert = document.createElement('div');
-  messageAlert.className = 'data-error';
-  messageAlert.style.position = 'fixed';
-  messageAlert.style.top = '20px';
-  messageAlert.style.left = '50%';
-  messageAlert.style.transform = 'translateX(-50%)';
-  messageAlert.style.backgroundColor = '#ee3939ff';
-  messageAlert.style.color = 'white';
-  messageAlert.style.padding = '30px 50px';
-  messageAlert.style.borderRadius = '8px';
-  messageAlert.style.zIndex = '10000';
-  messageAlert.style.textAlign = 'center';
-  messageAlert.style.fontSize = '20px';
-  messageAlert.style.fontFamily = 'Arial, sans-serif';
-  messageAlert.textContent = 'Ошибка загрузки фотографий!';
-  document.body.append(messageAlert);
+const onFail = () => { // Обработчик ошибки загрузки данных
+  const messageAlert = document.createElement('div'); // Создание элемента уведомления
+  messageAlert.className = 'data-error'; // Установка CSS класса
+  messageAlert.style.position = 'fixed'; // Фиксированное позиционирование
+  messageAlert.style.top = '20px'; // Отступ сверху
+  messageAlert.style.left = '50%'; // Центрирование по горизонтали
+  messageAlert.style.transform = 'translateX(-50%)'; // Точное центрирование
+  messageAlert.style.backgroundColor = '#ee3939ff'; // Цвет фона (красный)
+  messageAlert.style.color = 'white'; // Цвет текста
+  messageAlert.style.padding = '30px 50px'; // Внутренние отступы
+  messageAlert.style.borderRadius = '8px'; // Закругление углов
+  messageAlert.style.zIndex = '10000'; // Высокий z-index поверх всех элементов
+  messageAlert.style.textAlign = 'center'; // Выравнивание текста по центру
+  messageAlert.style.fontSize = '20px'; // Размер шрифта
+  messageAlert.style.fontFamily = 'Arial, sans-serif'; // Шрифт текста
+  messageAlert.textContent = 'Ошибка загрузки фотографий!'; // Текст сообщения
+  document.body.append(messageAlert); // Добавление уведомления в DOM
 };
 
-// Инициализация загрузки данных приложения
-fetchPhotoData(onSuccess, onFail);
+fetchPhotoData(onSuccess, onFail); // Инициализация загрузки данных приложения
 
-// Функция получения копии массива фотографий
-const getPhotos = () => photos.slice();
+const getPhotos = () => photos.slice(); // Функция получения копии массива фотографий
 
-export { getPhotos };
+export { getPhotos }; // Экспорт функции для использования в других модулях
