@@ -1,5 +1,5 @@
-import { renderPictures, clearPictures } from './pictures.js';
-import {delayCall, randomizeArray} from './util.js';
+import {imageRenders, clearPictures} from './pictures.js';
+import {debounce, shuffleArray} from './util.js';
 import {getPhotos} from './main.js';
 
 const FILTER_LIMIT = 10;
@@ -14,17 +14,17 @@ const availableFilters = {
   'filter-default': () => getPhotos(),
   'filter-random': () => {
     const allPhotos = getPhotos();
-    const shuffled = randomizeArray(allPhotos);
+    const shuffled = shuffleArray(allPhotos);
     return shuffled.slice(0, FILTER_LIMIT);
   },
   'filter-discussed': () => getPhotos().sort((firstElement, secondElement) => secondElement.comments.length - firstElement.comments.length
   )
 };
 
-const onImgFilterFormClick = delayCall((evt) => {
+const onImgFilterFormClick = debounce((evt) => {
   if (isButton(evt) && availableFilters[evt.target.id]) {
-    clearPictures();
-    renderPictures(availableFilters[evt.target.id]());
+    iclearPictures();
+    imageRenders(availableFilters[evt.target.id]());
   }
 });
 
