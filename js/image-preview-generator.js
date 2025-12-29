@@ -25,11 +25,11 @@ const displaySelectedImage = (file) => {
 };
 
 // Сбрасывает превью к изображению по умолчанию
-const clearImagePreview = () => {
+const clearPreview = () => {
   mainImagePreview.src = 'img/upload-default-image.jpg';
   filterPreviews.forEach((preview) => {
     preview.style.backgroundImage = 'url("img/upload-default-image.jpg")';
   });
 };
 
-export { displaySelectedImage, clearImagePreview };
+export { displaySelectedImage, clearPreview };
