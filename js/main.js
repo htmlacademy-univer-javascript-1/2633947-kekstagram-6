@@ -1,32 +1,39 @@
-import { initThumbnails } from './thumbnail-renderer.js';
-import { initFullscreenViewer } from './fullscreen-viewer.js';
-import { initFormValidator } from './form-validator.js';
-import { initImageEditor } from './image-editor.js';
-import { loadPhotos } from './api.js';
-import { showAlert } from './messages.js';
-import { initFilters } from './filters.js';
-import { initEffects } from './effects.js';
+import { loadData } from './fetch.js';
+import { renderPictures } from './pictures.js';
+import './filters.js';
+import './form.js';
 
-// Инициализируем все модули
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    // Инициализируем базовые модули
-    initFormValidator();
-    initImageEditor();
-    initEffects();
-    initFullscreenViewer();
+let photos = [];
 
-    // Загружаем данные
-    const photos = await loadPhotos();
-    window.loadedPhotosData = photos;
+const onSuccess = (data) => {
+  photos = data.slice();
+  renderPictures(photos);
+  document.querySelector('.img-filters').classList.remove('img-filters--inactive');
+};
 
-    // Инициализируем миниатюры
-    initThumbnails(photos);
+// Функция ошибки загрузки
+const onFail = () => {
+  const messageAlert = document.createElement('div');
+  messageAlert.className = 'data-error';
+  messageAlert.style.position = 'fixed';
+  messageAlert.style.top = '20px';
+  messageAlert.style.left = '50%';
+  messageAlert.style.transform = 'translateX(-50%)';
+  messageAlert.style.backgroundColor = '#ee3939ff';
+  messageAlert.style.color = 'white';
+  messageAlert.style.padding = '30px 50px';
+  messageAlert.style.borderRadius = '8px';
+  messageAlert.style.zIndex = '10000';
+  messageAlert.style.textAlign = 'center';
+  messageAlert.style.fontSize = '20px';
+  messageAlert.style.fontFamily = 'Arial, sans-serif';
+  messageAlert.textContent = 'Ошибка загрузки фотографий!';
+  document.body.append(messageAlert);
+};
 
-    // Инициализируем фильтры
-    initFilters(photos, initThumbnails);
+// Загружаем данные с сервера
+loadData(onSuccess, onFail);
 
-  } catch (error) {
-    showAlert('Не удалось загрузить фотографии. Проверьте подключение к интернету.');
-  }
-});
+const getPhotos = () => photos.slice();
+
+export { getPhotos };
