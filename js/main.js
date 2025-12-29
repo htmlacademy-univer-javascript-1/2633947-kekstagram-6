@@ -3,15 +3,17 @@ import { imageRender } from './gallery-manager.js';
 import './image-filter.js';
 import './upload-form-manager.js';
 
+// Массив для хранения загруженных фотографий
 let photos = [];
 
+// Обработчик успешной загрузки данных
 const onSuccess = (data) => {
   photos = data.slice();
   imageRender(photos);
   document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 };
 
-// Функция ошибки загрузки
+// Обработчик ошибки загрузки данных
 const onFail = () => {
   const messageAlert = document.createElement('div');
   messageAlert.className = 'data-error';
@@ -31,9 +33,10 @@ const onFail = () => {
   document.body.append(messageAlert);
 };
 
-// Загружаем данные с сервера
+// Инициализация загрузки данных приложения
 fetchPhotoData(onSuccess, onFail);
 
+// Функция получения копии массива фотографий
 const getPhotos = () => photos.slice();
 
 export { getPhotos };
