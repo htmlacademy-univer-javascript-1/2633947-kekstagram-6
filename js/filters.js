@@ -1,4 +1,4 @@
-import {imageRender, clearPictures} from './pictures.js';
+import {imageRender, clearPictures} from './picture.js';
 import {debounce, shuffleArray} from './util.js';
 import {getPhotos} from './main.js';
 
