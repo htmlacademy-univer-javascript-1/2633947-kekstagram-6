@@ -78,7 +78,7 @@ const updateFormSubmitButton = () => {
   formSubmitButton.textContent = 'Опубликовать';
 };
 // Валидирует всю форму
-const validateUploadForm = () => {
+const validateForm = () => {
   const hashtagValue = hashtagField.value;
   hashtagValidationError = validateHashtagInput(hashtagValue) ? '' : getHashtagValidationError(hashtagValue);
 
@@ -90,13 +90,13 @@ const validateUploadForm = () => {
 };
 
 // Блокирует кнопку отправки
-const disableFormSubmission = () => {
+const blockSubmitButton = () => {
   formSubmitButton.disabled = true;
   formSubmitButton.textContent = 'Отправляется...';
 };
 
 // Разблокирует кнопку отправки
-const enableFormSubmission = () => {
+const unblockSubmitButton = () => {
   updateFormSubmitButton();
 };
 
@@ -108,7 +108,7 @@ const resetUploadForm = () => {
   hashtagField.disabled = false;
   commentField.disabled = false;
 
-  enableFormSubmission();
+  unblockSubmitButton();
   clearPreview();
 
   hashtagValidationError = '';
@@ -121,24 +121,24 @@ const resetUploadForm = () => {
 function closeImageUploadModal() {
   uploadOverlay.classList.add('hidden');
   documentBody.classList.remove('modal-open');
-  document.removeEventListener('keydown', handleModalKeydown);
+  document.removeEventListener('keydown', onDocumentKeydown);
   resetUploadForm();
 }
 
 // Открывает модальное окно загрузки
-function openImageUploadModal	() {
-  enableFormSubmission();
+function onImageEditorOpen() {
+  unblockSubmitButton();
 
   uploadOverlay.classList.remove('hidden');
   documentBody.classList.add('modal-open');
-  document.addEventListener('keydown', handleModalKeydown);
+  document.addEventListener('keydown', onDocumentKeydown);
 
   initializeImageEditor();
   updateFormSubmitButton();
 }
 
 // Обработчик нажатия клавиш
-function handleModalKeydown(evt) {
+function onDocumentKeydown(evt) {
   if (isEscapeKey(evt)) {
     if (document.activeElement === hashtagField || document.activeElement === commentField) {
       return;
@@ -149,21 +149,21 @@ function handleModalKeydown(evt) {
 }
 
 // Обработчик изменения поля выбора файла
-const handleImageFileSelect = () => {
+const onFileInputChange = () => {
   const file = imageFileInput.files[0];
   if (!file) {
     return;
   }
 
   if (displaySelectedImage(file)) {
-    openImageUploadModal	();
+    onImageEditorOpen();
   } else {
     imageFileInput.value = '';
   }
 };
 
 // Показывает сообщение об успешной отправке
-function displaySuccessNotification() {
+function showSuccessMessage() {
   const template = document.querySelector('#success').content.cloneNode(true);
   const message = template.querySelector('.success');
   message.style.zIndex = '10000';
@@ -174,7 +174,7 @@ function displaySuccessNotification() {
     message.remove();
     document.removeEventListener('keydown', onSuccessMessageEscKeydown);
     // Возвращаем обработчик ESC для формы
-    document.addEventListener('keydown', handleModalKeydown);
+    document.addEventListener('keydown', onDocumentKeydown);
   }
 
   // Обработчик Escape для сообщения
@@ -191,7 +191,7 @@ function displaySuccessNotification() {
   });
 
   message.querySelector('.success__button').addEventListener('click', closeSuccessMessage);
-  document.removeEventListener('keydown', handleModalKeydown);
+  document.removeEventListener('keydown', onDocumentKeydown);
   document.addEventListener('keydown', onSuccessMessageEscKeydown);
 }
 
@@ -207,7 +207,7 @@ function showErrorMessage() {
     message.remove();
     document.removeEventListener('keydown', onErrorMessageEscKeydown);
     // Возвращаем обработчик ESC для формы
-    document.addEventListener('keydown', handleModalKeydown);
+    document.addEventListener('keydown', onDocumentKeydown);
   }
 
   // Обработчик Escape для сообщения
@@ -224,42 +224,42 @@ function showErrorMessage() {
   });
 
   message.querySelector('.error__button').addEventListener('click', closeErrorMessage);
-  document.removeEventListener('keydown', handleModalKeydown);
+  document.removeEventListener('keydown', onDocumentKeydown);
   document.addEventListener('keydown', onErrorMessageEscKeydown);
 }
 
 // Обработчик успешной отправки формы
 const onFormSubmitSuccess = () => {
   closeImageUploadModal();
-  displaySuccessNotification();
+  showSuccessMessage();
 };
 // Обработчик ошибки отправки формы
 const onFormSubmitError = () => {
-  enableFormSubmission();
+  unblockSubmitButton();
   showErrorMessage();
 };
 // Обработчик отправки формы
 const onFormSubmit = (evt) => {
   evt.preventDefault();
 
-  validateUploadForm();
+  validateForm();
 
   if (hashtagValidationError || commentValidationError) {
     updateValidationUI();
   } else {
-    disableFormSubmission();
+    blockSubmitButton();
     submitPhotoData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(uploadForm));
   }
 };
 
 // Обработчик ввода в поле хештегов
 const onHashtagInput = () => {
-  validateUploadForm();
+  validateForm();
 };
 
 // Обработчик ввода в поле комментария
 const onCommentInput = () => {
-  validateUploadForm();
+  validateForm();
 };
 
 // Обработчик нажатия клавиш в поле хештегов
@@ -270,7 +270,7 @@ const onHashtagInputKeydown = (evt) => {
 };
 
 // Обработчик нажатия клавиш в поле комментария
-const handleCommentInput = (evt) => {
+const onCommentInputKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.stopPropagation();
   }
@@ -278,13 +278,13 @@ const handleCommentInput = (evt) => {
 
 // Настраивает обработчики событий
 const setupEventListeners = () => {
-  imageFileInput.addEventListener('change', handleImageFileSelect);
+  imageFileInput.addEventListener('change', onFileInputChange);
   cancelUploadButton.addEventListener('click', closeImageUploadModal);
   uploadForm.addEventListener('submit', onFormSubmit);
   hashtagField.addEventListener('input', onHashtagInput);
   commentField.addEventListener('input', onCommentInput);
   hashtagField.addEventListener('keydown', onHashtagInputKeydown);
-  commentField.addEventListener('keydown', handleCommentInput);
+  commentField.addEventListener('keydown', onCommentInputKeydown);
 };
 
 setupEventListeners();
