@@ -4,122 +4,143 @@ import { initializeImageEditor, resetImageEditorSettings } from './image-editor.
 import { submitPhotoData } from './api.js';
 import { displaySelectedImage, clearPreview } from './image-preview-generator.js';
 
+// Максимальная длина комментария в символах
 const MAX_COMMENT_LENGTH = 140;
 
-const form = document.querySelector('.img-upload__form');
-const fileInput = document.querySelector('.img-upload__input');
-const overlay = document.querySelector('.img-upload__overlay');
-const cancelButton = document.querySelector('.img-upload__cancel');
-const hashtagInput = document.querySelector('.text__hashtags');
-const commentInput = document.querySelector('.text__description');
-const body = document.body;
-const submitButton = document.querySelector('.img-upload__submit');
+// Форма загрузки изображения
+const uploadForm = document.querySelector('.img-upload__form');
+// Поле выбора файла
+const imageFileInput = document.querySelector('.img-upload__input');
+ // Оверлей формы
+const uploadOverlay = document.querySelector('.img-upload__overlay');
+// Кнопка отмены
+const cancelUploadButton = document.querySelector('.img-upload__cancel');
+// Поле ввода хештегов
+const hashtagField = document.querySelector('.text__hashtags');
+// Поле ввода комментария
+const commentField = document.querySelector('.text__description');
+// Элемент documentBody документа
+const documentBody = document.documentBody;
+// Кнопка отправки формы
+const formSubmitButton = document.querySelector('.img-upload__submit');
 
-let hashtagError = '';
-let commentError = '';
+// Текущая ошибка валидации хештегов
+let hashtagValidationError = '';
+// Текущая ошибка валидации комментария
+let commentValidationError = '';
 
-const validateComment = (value) => value.length <= MAX_COMMENT_LENGTH;
+// Проверяет длину комментария
+const validateCommentLength = (value) => value.length <= MAX_COMMENT_LENGTH;
 
-const refreshErrorUI = () => {
-  const hashtagWrapper = hashtagInput.closest('.img-upload__field-wrapper');
-  if (hashtagWrapper) {
-    hashtagWrapper.classList.toggle('img-upload__field-wrapper--error', !!hashtagError);
+// Обновляет интерфейс отображения ошибок
+const updateValidationUI = () => {
+  const hashtagContainer = hashtagField.closest('.img-upload__field-wrapper'); // Контейнер поля хештегов
+  if (hashtagContainer) {
+    hashtagContainer.classList.toggle('img-upload__field-wrapper--error', !!hashtagValidationError);
 
-    let errorElement = hashtagWrapper.querySelector('.pristine-error');
+    let validationErrorElement = hashtagContainer.querySelector('.pristine-error');
 
-    if (hashtagError) {
-      errorElement = errorElement || document.createElement('div');
-      if (!hashtagWrapper.querySelector('.pristine-error')) {
-        errorElement.className = 'pristine-error';
-        hashtagWrapper.appendChild(errorElement);
+    if (hashtagValidationError) {
+      validationErrorElement = validationErrorElement || document.createElement('div');
+      if (!hashtagContainer.querySelector('.pristine-error')) {
+        validationErrorElement.className = 'pristine-error';
+        hashtagContainer.appendChild(validationErrorElement);
       }
-      errorElement.textContent = hashtagError;
-    } else if (errorElement) {
-      errorElement.remove();
+      validationErrorElement.textContent = hashtagValidationError;
+    } else if (validationErrorElement) {
+      validationErrorElement.remove();
     }
   }
 
-  const commentWrapper = commentInput.closest('.img-upload__field-wrapper');
-  if (commentWrapper) {
-    commentWrapper.classList.toggle('img-upload__field-wrapper--error', !!commentError);
+  // Контейнер поля комментария
+  const commentContainer = commentField.closest('.img-upload__field-wrapper');
+  if (commentContainer) {
+    commentContainer.classList.toggle('img-upload__field-wrapper--error', !!commentValidationError);
 
-    let errorElement = commentWrapper.querySelector('.pristine-error');
+    let validationErrorElement = commentContainer.querySelector('.pristine-error');
 
-    if (commentError) {
-      errorElement = errorElement || document.createElement('div');
-      if (!commentWrapper.querySelector('.pristine-error')) {
-        errorElement.className = 'pristine-error';
-        commentWrapper.appendChild(errorElement);
+    if (commentValidationError) {
+      validationErrorElement = validationErrorElement || document.createElement('div');
+      if (!commentContainer.querySelector('.pristine-error')) {
+        validationErrorElement.className = 'pristine-error';
+        commentContainer.appendChild(validationErrorElement);
       }
-      errorElement.textContent = commentError;
-    } else if (errorElement) {
-      errorElement.remove();
+      validationErrorElement.textContent = commentValidationError;
+    } else if (validationErrorElement) {
+      validationErrorElement.remove();
     }
   }
 };
+// Обновляет состояние кнопки отправки
+const updateFormSubmitButton = () => {
+  const isValid = !hashtagValidationError && !commentValidationError;
+  formSubmitButton.disabled = !isValid;
+  formSubmitButton.textContent = 'Опубликовать';
+};
+// Валидирует всю форму
+const validateUploadForm = () => {
+  const hashtagValue = hashtagField.value;
+  hashtagValidationError = validateHashtagInput(hashtagValue) ? '' : getHashtagValidationError(hashtagValue);
 
-const updateSubmitButton = () => {
-  const isValid = !hashtagError && !commentError;
-  submitButton.disabled = !isValid;
-  submitButton.textContent = 'Опубликовать';
+  // Получение значения комментария
+  const commentValue = commentField.value;
+  commentValidationError = validateCommentLength(commentValue) ? '' : `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`;
+  updateValidationUI();
+  updateFormSubmitButton();
 };
 
-const validateForm = () => {
-  const hashtagValue = hashtagInput.value;
-  hashtagError = validateHashtagInput(hashtagValue) ? '' : getHashtagValidationError(hashtagValue);
-
-  const commentValue = commentInput.value;
-  commentError = validateComment(commentValue) ? '' : `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`;
-  refreshErrorUI();
-  updateSubmitButton();
+// Блокирует кнопку отправки
+const disableFormSubmission = () => {
+  formSubmitButton.disabled = true;
+  formSubmitButton.textContent = 'Отправляется...';
 };
 
-const blockSubmitButton = () => {
-  submitButton.disabled = true;
-  submitButton.textContent = 'Отправляется...';
+// Разблокирует кнопку отправки
+const enableFormSubmission = () => {
+  updateFormSubmitButton();
 };
 
-const unblockSubmitButton = () => {
-  updateSubmitButton();
-};
-
+// Сбрасывает форму загрузки
 const resetUploadForm = () => {
-  form.reset();
+  uploadForm.reset();
   resetImageEditorSettings();
 
-  hashtagInput.disabled = false;
-  commentInput.disabled = false;
+  hashtagField.disabled = false;
+  commentField.disabled = false;
 
-  unblockSubmitButton();
+  enableFormSubmission();
   clearPreview();
 
-  hashtagError = '';
-  commentError = '';
-  refreshErrorUI();
-  updateSubmitButton();
+  hashtagValidationError = '';
+  commentValidationError = '';
+  updateValidationUI();
+  updateFormSubmitButton();
 };
 
+// Закрывает модальное окно загрузки
 function closeImageUploadModal() {
-  overlay.classList.add('hidden');
-  body.classList.remove('modal-open');
-  document.removeEventListener('keydown', onDocumentKeydown);
+  uploadOverlay.classList.add('hidden');
+  documentBody.classList.remove('modal-open');
+  document.removeEventListener('keydown', handleModalKeydown);
   resetUploadForm();
 }
 
-function onImageEditorOpen() {
-  unblockSubmitButton();
+// Открывает модальное окно загрузки
+function closeImageUploadModal() {
+  enableFormSubmission();
 
-  overlay.classList.remove('hidden');
-  body.classList.add('modal-open');
-  document.addEventListener('keydown', onDocumentKeydown);
+  uploadOverlay.classList.remove('hidden');
+  documentBody.classList.add('modal-open');
+  document.addEventListener('keydown', handleModalKeydown);
 
   initializeImageEditor();
-  updateSubmitButton();
+  updateFormSubmitButton();
 }
 
-function onDocumentKeydown(evt) {
+// Обработчик нажатия клавиш
+function handleModalKeydown(evt) {
   if (isEscapeKey(evt)) {
-    if (document.activeElement === hashtagInput || document.activeElement === commentInput) {
+    if (document.activeElement === hashtagField || document.activeElement === commentField) {
       return;
     }
     evt.preventDefault();
@@ -127,32 +148,36 @@ function onDocumentKeydown(evt) {
   }
 }
 
+// Обработчик изменения поля выбора файла
 const onFileInputChange = () => {
-  const file = fileInput.files[0];
+  const file = imageFileInput.files[0];
   if (!file) {
     return;
   }
 
   if (displaySelectedImage(file)) {
-    onImageEditorOpen();
+    closeImageUploadModal();
   } else {
-    fileInput.value = '';
+    imageFileInput.value = '';
   }
 };
 
+// Показывает сообщение об успешной отправке
 function showSuccessMessage() {
   const template = document.querySelector('#success').content.cloneNode(true);
   const message = template.querySelector('.success');
   message.style.zIndex = '10000';
-  document.body.appendChild(message);
+  document.documentBody.appendChild(message);
 
+  // Закрывает сообщение об успехе
   function closeSuccessMessage() {
     message.remove();
     document.removeEventListener('keydown', onSuccessMessageEscKeydown);
     // Возвращаем обработчик ESC для формы
-    document.addEventListener('keydown', onDocumentKeydown);
+    document.addEventListener('keydown', handleModalKeydown);
   }
 
+  // Обработчик Escape для сообщения
   function onSuccessMessageEscKeydown(evt) {
     if (isEscapeKey(evt)) {
       closeSuccessMessage();
@@ -166,23 +191,26 @@ function showSuccessMessage() {
   });
 
   message.querySelector('.success__button').addEventListener('click', closeSuccessMessage);
-  document.removeEventListener('keydown', onDocumentKeydown);
+  document.removeEventListener('keydown', handleModalKeydown);
   document.addEventListener('keydown', onSuccessMessageEscKeydown);
 }
 
+// Показывает сообщение об ошибке отправки
 function showErrorMessage() {
   const template = document.querySelector('#error').content.cloneNode(true);
   const message = template.querySelector('.error');
   message.style.zIndex = '10000';
-  document.body.appendChild(message);
+  document.documentBody.appendChild(message);
 
+  // Закрывает сообщение об ошибке
   function closeErrorMessage() {
     message.remove();
     document.removeEventListener('keydown', onErrorMessageEscKeydown);
     // Возвращаем обработчик ESC для формы
-    document.addEventListener('keydown', onDocumentKeydown);
+    document.addEventListener('keydown', handleModalKeydown);
   }
 
+  // Обработчик Escape для сообщения
   function onErrorMessageEscKeydown(evt) {
     if (isEscapeKey(evt)) {
       closeErrorMessage();
@@ -196,61 +224,67 @@ function showErrorMessage() {
   });
 
   message.querySelector('.error__button').addEventListener('click', closeErrorMessage);
-  document.removeEventListener('keydown', onDocumentKeydown);
+  document.removeEventListener('keydown', handleModalKeydown);
   document.addEventListener('keydown', onErrorMessageEscKeydown);
 }
 
+// Обработчик успешной отправки формы
 const onFormSubmitSuccess = () => {
   closeImageUploadModal();
   showSuccessMessage();
 };
-
+// Обработчик ошибки отправки формы
 const onFormSubmitError = () => {
-  unblockSubmitButton();
+  enableFormSubmission();
   showErrorMessage();
 };
-
+// Обработчик отправки формы
 const onFormSubmit = (evt) => {
   evt.preventDefault();
 
-  validateForm();
+  validateUploadForm();
 
-  if (hashtagError || commentError) {
-    refreshErrorUI();
+  if (hashtagValidationError || commentValidationError) {
+    updateValidationUI();
   } else {
-    blockSubmitButton();
-    submitPhotoData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(form));
+    disableFormSubmission();
+    submitPhotoData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(uploadForm));
   }
 };
 
+// Обработчик ввода в поле хештегов
 const onHashtagInput = () => {
-  validateForm();
+  validateUploadForm();
 };
 
+// Обработчик ввода в поле комментария
 const onCommentInput = () => {
-  validateForm();
+  validateUploadForm();
 };
 
+// Обработчик нажатия клавиш в поле хештегов
 const onHashtagInputKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.stopPropagation();
   }
 };
 
+// Обработчик нажатия клавиш в поле комментария
 const onCommentInputKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.stopPropagation();
   }
 };
 
+// Настраивает обработчики событий
 const setupEventListeners = () => {
-  fileInput.addEventListener('change', onFileInputChange);
-  cancelButton.addEventListener('click', closeImageUploadModal);
-  form.addEventListener('submit', onFormSubmit);
-  hashtagInput.addEventListener('input', onHashtagInput);
-  commentInput.addEventListener('input', onCommentInput);
-  hashtagInput.addEventListener('keydown', onHashtagInputKeydown);
-  commentInput.addEventListener('keydown', onCommentInputKeydown);
+  imageFileInput.addEventListener('change', onFileInputChange);
+  cancelUploadButton.addEventListener('click', closeImageUploadModal);
+  uploadForm.addEventListener('submit', onFormSubmit);
+  hashtagField.addEventListener('input', onHashtagInput);
+  commentField.addEventListener('input', onCommentInput);
+  hashtagField.addEventListener('keydown', onHashtagInputKeydown);
+  commentField.addEventListener('keydown', onCommentInputKeydown);
 };
 
 setupEventListeners();
