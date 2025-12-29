@@ -1,3 +1,5 @@
+
+
 import { isEscapeKey } from './util.js';
 
 const COMMENTS_BATCH_SIZE = 5; // Количество комментариев, загружаемых за один раз
