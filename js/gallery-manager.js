@@ -3,36 +3,36 @@ import { expandImage } from './image-detail-view.js';
 // Контейнер для галереи изображений
 const galleryContainer = document.querySelector('.galleryContainer');
 // Шаблон миниатюры изображения
-const photoThumbnailTemplate = document.querySelector('#photoData').content.querySelector('.photoData');
+const photoThumbnailTemplate = document.querySelector('#picture').content.querySelector('.picture');
 // Создает DOM-элемент миниатюры изображения
-const createPhotoThumbnail = (photoData)=>{
-  const {url, description, comments, likes} = photoData; // Деструктуризация данных изображения
-  const thumbnailElement = photoThumbnailTemplate.cloneNode(true); // Клонирование шаблона
+const renderPicture = (picture)=>{
+  const {url, description, comments, likes} = picture; // Деструктуризация данных изображения
+  const pictureElement = photoThumbnailTemplate.cloneNode(true); // Клонирование шаблона
 
-  thumbnailElement.querySelector('.picture__img').src = url;
-  thumbnailElement.querySelector('.picture__img').alt = description;
-  thumbnailElement.querySelector('.picture__comments').textContent = comments.length;
-  thumbnailElement.querySelector('.picture__likes').textContent = likes;
+  pictureElement.querySelector('.picture__img').src = url;
+  pictureElement.querySelector('.picture__img').alt = description;
+  pictureElement.querySelector('.picture__comments').textContent = comments.length;
+  pictureElement.querySelector('.picture__likes').textContent = likes;
 
-  thumbnailElement.addEventListener('click', (evt) => {
+  pictureElement.addEventListener('click', (evt) => {
     evt.preventDefault();
-    expandImage(photoData);
+    expandImage(picture);
   });
 
-  return thumbnailElement;
+  return pictureElement;
 };
 
 // Отрисовывает коллекцию изображений в галерее
-const imageRender = (photosCollection)=>{
+const imageRender = (objects)=>{
   const galleryFragment = document.createDocumentFragment();
-  for (let i = 0; i < photosCollection.length; i++){
-    galleryFragment.appendChild(createPhotoThumbnail(photosCollection[i]));
+  for (let i = 0; i < objects.length; i++){
+    galleryFragment.appendChild(renderPicture(objects[i]));
   }
   galleryContainer.appendChild(galleryFragment);
 };
 
 // Получение всех миниатюр в галерее
-const galleryThumbnails = galleryContainer.getElementsByClassName('photoData');
+const galleryThumbnails = galleryContainer.getElementsByClassName('picture');
 
 // Очищает все изображения из галереи
 const clearPictures = ()=>{
