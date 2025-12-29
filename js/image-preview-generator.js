@@ -28,4 +28,4 @@ const clearPreview = () => { // Сбрасывает превью к изобр�
   });
 };
 
-export { displaySelectedImage, clearPreview }; // Экспорт функций для использования в других модулях
+export { displaySelectedImage, clearPreview };
