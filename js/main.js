@@ -1,7 +1,7 @@
 import { fetchPhotoData } from './api.js';
 import { imageRender } from './gallery-manager.js';
 import './image-filter.js';
-import './form.js';
+import './upload-form-manager.js';
 
 let photos = [];
 

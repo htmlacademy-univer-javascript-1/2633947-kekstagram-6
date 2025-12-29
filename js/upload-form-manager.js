@@ -83,7 +83,7 @@ const unblockSubmitButton = () => {
   updateSubmitButton();
 };
 
-const resetForm = () => {
+const resetUploadForm = () => {
   form.reset();
   resetImageEditorSettings();
 
@@ -99,11 +99,11 @@ const resetForm = () => {
   updateSubmitButton();
 };
 
-function onImageEditorClose() {
+function closeImageUploadModal() {
   overlay.classList.add('hidden');
   body.classList.remove('modal-open');
   document.removeEventListener('keydown', onDocumentKeydown);
-  resetForm();
+  resetUploadForm();
 }
 
 function onImageEditorOpen() {
@@ -123,7 +123,7 @@ function onDocumentKeydown(evt) {
       return;
     }
     evt.preventDefault();
-    onImageEditorClose();
+    closeImageUploadModal();
   }
 }
 
@@ -201,7 +201,7 @@ function showErrorMessage() {
 }
 
 const onFormSubmitSuccess = () => {
-  onImageEditorClose();
+  closeImageUploadModal();
   showSuccessMessage();
 };
 
@@ -245,7 +245,7 @@ const onCommentInputKeydown = (evt) => {
 
 const setupEventListeners = () => {
   fileInput.addEventListener('change', onFileInputChange);
-  cancelButton.addEventListener('click', onImageEditorClose);
+  cancelButton.addEventListener('click', closeImageUploadModal);
   form.addEventListener('submit', onFormSubmit);
   hashtagInput.addEventListener('input', onHashtagInput);
   commentInput.addEventListener('input', onCommentInput);
@@ -255,4 +255,4 @@ const setupEventListeners = () => {
 
 setupEventListeners();
 
-export { onImageEditorClose as closeImageEditor, resetForm };
+export { closeImageUploadModal as closeImageEditor, resetUploadForm };
