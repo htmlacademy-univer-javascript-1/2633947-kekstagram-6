@@ -1,4 +1,4 @@
-import { imageRender, clearPictures } from './gallery-manager.js';
+import { renderPictures, clearPictures } from './pictures.js';
 import {delayCall, randomizeArray} from './util.js';
 import {getPhotos} from './main.js';
 
@@ -24,7 +24,7 @@ const availableFilters = {
 const onImgFilterFormClick = delayCall((evt) => {
   if (isButton(evt) && availableFilters[evt.target.id]) {
     clearPictures();
-    imageRender(availableFilters[evt.target.id]());
+    renderPictures(availableFilters[evt.target.id]());
   }
 });
 
