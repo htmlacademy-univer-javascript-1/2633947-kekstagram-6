@@ -4,7 +4,7 @@ const API_ENDPOINTS = {
 };
 
 // Выполняет HTTP-запрос к API
-const performApiRequest = (successCallback, errorCallback, httpMethod, body) => { 
+const performApiRequest = (successCallback, errorCallback, httpMethod, body) => {
   fetch(API_ENDPOINTS[httpMethod], {
     httpMethod: httpMethod,
     body: body,
