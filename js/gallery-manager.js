@@ -24,20 +24,20 @@ const renderPicture = (picture)=>{
 
 // Отрисовывает коллекцию изображений в галерее
 const imageRender = (objects)=>{
-  const galleryFragment = document.createDocumentFragment();
+  const fragment = document.createDocumentFragment();
   for (let i = 0; i < objects.length; i++){
-    galleryFragment.appendChild(renderPicture(objects[i]));
+    fragment.appendChild(renderPicture(objects[i]));
   }
-  galleryContainer.appendChild(galleryFragment);
+  galleryContainer.appendChild(fragment);
 };
 
 // Получение всех миниатюр в галерее
-const galleryThumbnails = galleryContainer.getElementsByClassName('picture');
+const photos = galleryContainer.getElementsByClassName('picture');
 
 // Очищает все изображения из галереи
 const clearPictures = ()=>{
-  if (galleryThumbnails){
-    [...galleryThumbnails].forEach((photo) => photo.remove());
+  if (photos){
+    [...photos].forEach((photo) => photo.remove());
   }
 };
 
