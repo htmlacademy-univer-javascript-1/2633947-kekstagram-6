@@ -19,7 +19,7 @@ const renderPicture = (picture)=>{
   return pictureElement;
 };
 
-const renderPictures = (objects)=>{
+const imageRender = (objects)=>{
   const fragment = document.createDocumentFragment();
   for (let i = 0; i < objects.length; i++){
     fragment.appendChild(renderPicture(objects[i]));
@@ -29,10 +29,10 @@ const renderPictures = (objects)=>{
 
 const photos = pictures.getElementsByClassName('picture');
 
-const removePictures = ()=>{
+const clearPictures = ()=>{
   if (photos){
     [...photos].forEach((photo) => photo.remove());
   }
 };
 
-export {renderPictures, removePictures};
+export {imageRender, clearPictures};
