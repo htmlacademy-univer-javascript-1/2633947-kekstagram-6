@@ -1,31 +1,28 @@
-const API_ENDPOINTS = {
+const URLS = {
   GET: 'https://29.javascript.htmlacademy.pro/kekstagram/data', // URL для получения данных
   POST: 'https://29.javascript.htmlacademy.pro/kekstagram/', // URL для отправки данных
 };
 
-// Выполняет HTTP-запрос к API
-const performApiRequest = (successCallback, errorCallback, httpMethod, body) => {
-  fetch(API_ENDPOINTS[httpMethod], {
-    httpMethod: httpMethod,
+const makeRequest = (onSuccess, onError, method, body) => { // Выполняет HTTP-запрос к API
+  fetch(URLS[method], {
+    method: method,
     body: body,
   })
     .then((response) => response.json())
-    .then((requestError) => {
-      successCallback(requestError);
+    .then((data) => {
+      onSuccess(data);
     })
-    .catch((requestError) => {
-      errorCallback(requestError);
+    .catch((err) => {
+      onError(err);
     });
 };
 
-// Загружает данные фотографий
-const fetchPhotoData = (successCallback, errorCallback, httpMethod = 'GET') => {
-  performApiRequest(successCallback, errorCallback, httpMethod);
+const fetchPhotoData = (onSuccess, onError, method = 'GET') => { // Загружает данные фотографий
+  makeRequest(onSuccess, onError, method);
 };
 
-// Отправляет данные фотографии
-const submitPhotoData = (successCallback, errorCallback, httpMethod = 'POST', body) => {
-  performApiRequest(successCallback, errorCallback, httpMethod, body);
+const submitPhotoData = (onSuccess, onError, method = 'POST', body) => { // Отправляет данные фотографии
+  makeRequest(onSuccess, onError, method, body);
 };
 
 export { fetchPhotoData, submitPhotoData };
