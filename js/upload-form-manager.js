@@ -38,17 +38,17 @@ const updateValidationUI = () => {
   if (hashtagContainer) {
     hashtagContainer.classList.toggle('img-upload__field-wrapper--error', !!hashtagValidationError);
 
-    let validationErrorElement = hashtagContainer.querySelector('.pristine-error');
+    let errorElement = hashtagContainer.querySelector('.pristine-error');
 
     if (hashtagValidationError) {
-      validationErrorElement = validationErrorElement || document.createElement('div');
+      errorElement = errorElement || document.createElement('div');
       if (!hashtagContainer.querySelector('.pristine-error')) {
-        validationErrorElement.className = 'pristine-error';
-        hashtagContainer.appendChild(validationErrorElement);
+        errorElement.className = 'pristine-error';
+        hashtagContainer.appendChild(errorElement);
       }
-      validationErrorElement.textContent = hashtagValidationError;
-    } else if (validationErrorElement) {
-      validationErrorElement.remove();
+      errorElement.textContent = hashtagValidationError;
+    } else if (errorElement) {
+      errorElement.remove();
     }
   }
 
@@ -57,28 +57,28 @@ const updateValidationUI = () => {
   if (commentContainer) {
     commentContainer.classList.toggle('img-upload__field-wrapper--error', !!commentValidationError);
 
-    let validationErrorElement = commentContainer.querySelector('.pristine-error');
+    let errorElement = commentContainer.querySelector('.pristine-error');
 
     if (commentValidationError) {
-      validationErrorElement = validationErrorElement || document.createElement('div');
+      errorElement = errorElement || document.createElement('div');
       if (!commentContainer.querySelector('.pristine-error')) {
-        validationErrorElement.className = 'pristine-error';
-        commentContainer.appendChild(validationErrorElement);
+        errorElement.className = 'pristine-error';
+        commentContainer.appendChild(errorElement);
       }
-      validationErrorElement.textContent = commentValidationError;
-    } else if (validationErrorElement) {
-      validationErrorElement.remove();
+      errorElement.textContent = commentValidationError;
+    } else if (errorElement) {
+      errorElement.remove();
     }
   }
 };
 // Обновляет состояние кнопки отправки
-const updateFormSubmitButton = () => {
+const updateSubmitButton = () => {
   const isValid = !hashtagValidationError && !commentValidationError;
   formSubmitButton.disabled = !isValid;
   formSubmitButton.textContent = 'Опубликовать';
 };
 // Валидирует всю форму
-const validateUploadForm = () => {
+const validateForm = () => {
   const hashtagValue = hashtagField.value;
   hashtagValidationError = validateHashtagInput(hashtagValue) ? '' : getHashtagValidationError(hashtagValue);
 
@@ -86,18 +86,18 @@ const validateUploadForm = () => {
   const commentValue = commentField.value;
   commentValidationError = validateCommentLength(commentValue) ? '' : `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`;
   updateValidationUI();
-  updateFormSubmitButton();
+  updateSubmitButton();
 };
 
 // Блокирует кнопку отправки
-const disableFormSubmission = () => {
+const blockSubmitButton = () => {
   formSubmitButton.disabled = true;
   formSubmitButton.textContent = 'Отправляется...';
 };
 
 // Разблокирует кнопку отправки
-const enableFormSubmission = () => {
-  updateFormSubmitButton();
+const unblockSubmitButton = () => {
+  updateSubmitButton();
 };
 
 // Сбрасывает форму загрузки
@@ -108,37 +108,37 @@ const resetUploadForm = () => {
   hashtagField.disabled = false;
   commentField.disabled = false;
 
-  enableFormSubmission();
+  unblockSubmitButton();
   clearPreview();
 
   hashtagValidationError = '';
   commentValidationError = '';
   updateValidationUI();
-  updateFormSubmitButton();
+  updateSubmitButton();
 };
 
 // Закрывает модальное окно загрузки
 function closeImageUploadModal() {
   uploadOverlay.classList.add('hidden');
   documentBody.classList.remove('modal-open');
-  document.removeEventListener('keydown', handleModalKeydown);
+  document.removeEventListener('keydown', onDocumentKeydown);
   resetUploadForm();
 }
 
 // Открывает модальное окно загрузки
-function closeImageUploadModal() {
-  enableFormSubmission();
+function onImageEditorOpen() {
+  unblockSubmitButton();
 
   uploadOverlay.classList.remove('hidden');
   documentBody.classList.add('modal-open');
-  document.addEventListener('keydown', handleModalKeydown);
+  document.addEventListener('keydown', onDocumentKeydown);
 
   initializeImageEditor();
-  updateFormSubmitButton();
+  updateSubmitButton();
 }
 
 // Обработчик нажатия клавиш
-function handleModalKeydown(evt) {
+function onDocumentKeydown(evt) {
   if (isEscapeKey(evt)) {
     if (document.activeElement === hashtagField || document.activeElement === commentField) {
       return;
@@ -156,7 +156,7 @@ const onFileInputChange = () => {
   }
 
   if (displaySelectedImage(file)) {
-    closeImageUploadModal();
+    onImageEditorOpen();
   } else {
     imageFileInput.value = '';
   }
@@ -174,7 +174,7 @@ function showSuccessMessage() {
     message.remove();
     document.removeEventListener('keydown', onSuccessMessageEscKeydown);
     // Возвращаем обработчик ESC для формы
-    document.addEventListener('keydown', handleModalKeydown);
+    document.addEventListener('keydown', onDocumentKeydown);
   }
 
   // Обработчик Escape для сообщения
@@ -191,7 +191,7 @@ function showSuccessMessage() {
   });
 
   message.querySelector('.success__button').addEventListener('click', closeSuccessMessage);
-  document.removeEventListener('keydown', handleModalKeydown);
+  document.removeEventListener('keydown', onDocumentKeydown);
   document.addEventListener('keydown', onSuccessMessageEscKeydown);
 }
 
@@ -207,7 +207,7 @@ function showErrorMessage() {
     message.remove();
     document.removeEventListener('keydown', onErrorMessageEscKeydown);
     // Возвращаем обработчик ESC для формы
-    document.addEventListener('keydown', handleModalKeydown);
+    document.addEventListener('keydown', onDocumentKeydown);
   }
 
   // Обработчик Escape для сообщения
@@ -224,7 +224,7 @@ function showErrorMessage() {
   });
 
   message.querySelector('.error__button').addEventListener('click', closeErrorMessage);
-  document.removeEventListener('keydown', handleModalKeydown);
+  document.removeEventListener('keydown', onDocumentKeydown);
   document.addEventListener('keydown', onErrorMessageEscKeydown);
 }
 
@@ -235,31 +235,31 @@ const onFormSubmitSuccess = () => {
 };
 // Обработчик ошибки отправки формы
 const onFormSubmitError = () => {
-  enableFormSubmission();
+  unblockSubmitButton();
   showErrorMessage();
 };
 // Обработчик отправки формы
 const onFormSubmit = (evt) => {
   evt.preventDefault();
 
-  validateUploadForm();
+  validateForm();
 
   if (hashtagValidationError || commentValidationError) {
     updateValidationUI();
   } else {
-    disableFormSubmission();
+    blockSubmitButton();
     submitPhotoData(onFormSubmitSuccess, onFormSubmitError, 'POST', new FormData(uploadForm));
   }
 };
 
 // Обработчик ввода в поле хештегов
 const onHashtagInput = () => {
-  validateUploadForm();
+  validateForm();
 };
 
 // Обработчик ввода в поле комментария
 const onCommentInput = () => {
-  validateUploadForm();
+  validateForm();
 };
 
 // Обработчик нажатия клавиш в поле хештегов
