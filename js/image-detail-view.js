@@ -1,99 +1,99 @@
 import { isEscapeKey } from './util.js';
 
-const COMMENTS_PER_LOAD = 5;
+const COMMENTS_BATCH_SIZE = 5; // Количество комментариев, загружаемых за один раз
 
-const bigPicture = document.querySelector('.big-picture');
-const bigPictureImg = bigPicture.querySelector('.big-picture__img img');
-const likesCount = bigPicture.querySelector('.likes-count');
-const commentsCount = bigPicture.querySelector('.comments-count');
-const socialComments = bigPicture.querySelector('.social__comments');
-const socialCaption = bigPicture.querySelector('.social__caption');
-const closeButton = bigPicture.querySelector('.big-picture__cancel');
-const commentCountElement = bigPicture.querySelector('.social__comment-count');
-const commentsLoader = bigPicture.querySelector('.comments-loader');
+const fullscreenModal = document.querySelector('.big-picture'); // Модальное окно с изображением
+const fullscreenModalImg = fullscreenModal.querySelector('.big-picture__img img'); // Изображение в модальном окне
+const likesCounter = fullscreenModal.querySelector('.likes-count'); // Счетчик лайков
+const totalCommentsCounter = fullscreenModal.querySelector('.comments-count'); // Общее количество комментариев
+const commentsContainer = fullscreenModal.querySelector('.social__comments'); // Контейнер для комментариев
+const imageDescription = fullscreenModal.querySelector('.social__caption'); // Описание изображения
+const modalCloseButton = fullscreenModal.querySelector('.big-picture__cancel'); // Кнопка закрытия модального окна
+const commentsCounterElement = fullscreenModal.querySelector('.social__comment-count'); // Элемент счетчика комментариев
+const commentsLoadButton = fullscreenModal.querySelector('.comments-loader'); // Кнопка загрузки дополнительных комментариев
 
-let currentComments = [];
-let commentsShown = 0;
+let activeCommentsList = []; // Массив комментариев текущего изображения
+let displayedCommentsCount = 0; // Количество отображенных комментариев
 
-const createComment = (comment) => {
-  const commentElement = document.createElement('li');
-  commentElement.classList.add('social__comment');
+const buildCommentElement = (commentData) => { // Создает DOM-элемент комментария
+  const commentListItem = document.createElement('li');
+  commentListItem.classList.add('social__comment');
 
   const img = document.createElement('img');
   img.classList.add('social__picture');
-  img.src = comment.avatar;
-  img.alt = comment.name;
+  img.src = commentData.avatar;
+  img.alt = commentData.name;
   img.width = 35;
   img.height = 35;
 
   const text = document.createElement('p');
   text.classList.add('social__text');
-  text.textContent = comment.message;
+  text.textContent = commentData.message;
 
-  commentElement.appendChild(img);
-  commentElement.appendChild(text);
+  commentListItem.appendChild(img);
+  commentListItem.appendChild(text);
 
-  return commentElement;
+  return commentListItem;
 };
 
-const renderComments = () => {
-  const commentsToShow = currentComments.slice(commentsShown, commentsShown + COMMENTS_PER_LOAD);
+const renderCommentsBatch = () => { // Отображает порцию комментариев
+  const commentsBatch = activeCommentsList.slice(displayedCommentsCount, displayedCommentsCount + COMMENTS_BATCH_SIZE);
 
-  const fragment = document.createDocumentFragment();
-  commentsToShow.forEach((comment) => {
-    fragment.appendChild(createComment(comment));
+  const commentsFragment = document.createDocumentFragment();
+  commentsBatch.forEach((commentData) => {
+    commentsFragment.appendChild(buildCommentElement(commentData));
   });
 
-  socialComments.appendChild(fragment);
+  commentsContainer.appendChild(commentsFragment);
 
-  commentsShown += commentsToShow.length;
+  displayedCommentsCount += commentsBatch.length;
 
-  const shownCountElement = commentCountElement.querySelector('.social__comment-shown-count');
-  const totalCountElement = commentCountElement.querySelector('.social__comment-total-count');
+  const shownCountElement = commentsCounterElement.querySelector('.social__comment-shown-count');
+  const totalCountElement = commentsCounterElement.querySelector('.social__comment-total-count');
 
   if (shownCountElement) {
-    shownCountElement.textContent = commentsShown;
+    shownCountElement.textContent = displayedCommentsCount;
   }
 
   if (totalCountElement) {
-    totalCountElement.textContent = currentComments.length;
+    totalCountElement.textContent = activeCommentsList.length;
   }
 
-  if (commentsShown >= currentComments.length) {
-    commentsLoader.classList.add('hidden');
+  if (displayedCommentsCount >= activeCommentsList.length) {
+    commentsLoadButton.classList.add('hidden');
   } else {
-    commentsLoader.classList.remove('hidden');
+    commentsLoadButton.classList.remove('hidden');
   }
 };
 
-const onCommentsLoaderClick = () => {
-  renderComments();
+const oncommentsLoadButtonClick = () => { // Обработчик клика по кнопке загрузки комментариев
+  renderCommentsBatch();
 };
 
-const resetComments = () => {
-  socialComments.innerHTML = '';
-  commentsShown = 0;
-  currentComments = [];
-  commentsLoader.classList.remove('hidden');
+const resetComments = () => { // Сбрасывает состояние комментариев
+  commentsContainer.innerHTML = '';
+  displayedCommentsCount = 0;
+  activeCommentsList = [];
+  commentsLoadButton.classList.remove('hidden');
 };
 
-const expandImage = (photo) => {
+const expandImage = (photo) => { // Открывает модальное окно с изображением
   const { url, likes, comments, description } = photo;
 
   resetComments();
 
-  bigPictureImg.src = url;
-  bigPictureImg.alt = description;
-  likesCount.textContent = likes;
-  commentsCount.textContent = comments.length;
-  socialCaption.textContent = description;
+  fullscreenModalImg.src = url;
+  fullscreenModalImg.alt = description;
+  likesCounter.textContent = likes;
+  totalCommentsCounter.textContent = comments.length;
+  imageDescription.textContent = description;
 
-  currentComments = comments;
+  activeCommentsList = comments;
 
-  const shownCountElement = commentCountElement.querySelector('.social__comment-shown-count');
-  const totalCountElement = commentCountElement.querySelector('.social__comment-total-count');
+  const shownCountElement = commentsCounterElement.querySelector('.social__comment-shown-count');
+  const totalCountElement = commentsCounterElement.querySelector('.social__comment-total-count');
 
-  const initialShown = Math.min(COMMENTS_PER_LOAD, comments.length);
+  const initialShown = Math.min(COMMENTS_BATCH_SIZE, comments.length);
 
   if (shownCountElement) {
     shownCountElement.textContent = initialShown;
@@ -103,36 +103,36 @@ const expandImage = (photo) => {
     totalCountElement.textContent = comments.length;
   }
 
-  renderComments();
+  renderCommentsBatch();
 
-  if (comments.length <= COMMENTS_PER_LOAD) {
-    commentsLoader.classList.add('hidden');
+  if (comments.length <= COMMENTS_BATCH_SIZE) {
+    commentsLoadButton.classList.add('hidden');
   } else {
-    commentsLoader.classList.remove('hidden');
+    commentsLoadButton.classList.remove('hidden');
   }
 
-  bigPicture.classList.remove('hidden');
+  fullscreenModal.classList.remove('hidden');
   document.body.classList.add('modal-open');
 };
 
-const closeBigPicture = () => {
-  bigPicture.classList.add('hidden');
+const closeBigPicture = () => { // Закрывает модальное окно
+  fullscreenModal.classList.add('hidden');
   document.body.classList.remove('modal-open');
 };
 
-const onBigPictureEscKeydown = (evt) => {
-  if (isEscapeKey(evt) && !bigPicture.classList.contains('hidden')) {
+const onBigPictureEscKeydown = (evt) => { // Обработчик нажатия клавиши Escape
+  if (isEscapeKey(evt) && !fullscreenModal.classList.contains('hidden')) {
     evt.preventDefault();
     closeBigPicture();
   }
 };
 
-closeButton.addEventListener('click', () => {
+modalCloseButton.addEventListener('click', () => { // Обработчик клика по кнопке закрытия
   closeBigPicture();
 });
 
-commentsLoader.addEventListener('click', onCommentsLoaderClick);
+commentsLoadButton.addEventListener('click', oncommentsLoadButtonClick); // Назначение обработчика кнопки загрузки
 
-document.addEventListener('keydown', onBigPictureEscKeydown);
+document.addEventListener('keydown', onBigPictureEscKeydown); // Назначение обработчика клавиатуры
 
-export { expandImage };
+export { expandImage }; // Экспорт функции открытия изображения
