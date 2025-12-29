@@ -1,44 +1,44 @@
 import { expandImage } from './image-detail-view.js';
 
 // Контейнер для галереи изображений
-const pictures = document.querySelector('.pictures');
+const galleryContainer = document.querySelector('.galleryContainer');
 // Шаблон миниатюры изображения
-const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
+const photoThumbnailTemplate = document.querySelector('#photoData').content.querySelector('.photoData');
 // Создает DOM-элемент миниатюры изображения
-const renderPicture = (picture)=>{
-  const {url, description, comments, likes} = picture; // Деструктуризация данных изображения
-  const pictureElement = pictureTemplate.cloneNode(true); // Клонирование шаблона
+const createPhotoThumbnail = (photoData)=>{
+  const {url, description, comments, likes} = photoData; // Деструктуризация данных изображения
+  const thumbnailElement = photoThumbnailTemplate.cloneNode(true); // Клонирование шаблона
 
-  pictureElement.querySelector('.picture__img').src = url;
-  pictureElement.querySelector('.picture__img').alt = description;
-  pictureElement.querySelector('.picture__comments').textContent = comments.length;
-  pictureElement.querySelector('.picture__likes').textContent = likes;
+  thumbnailElement.querySelector('.picture__img').src = url;
+  thumbnailElement.querySelector('.picture__img').alt = description;
+  thumbnailElement.querySelector('.picture__comments').textContent = comments.length;
+  thumbnailElement.querySelector('.picture__likes').textContent = likes;
 
-  pictureElement.addEventListener('click', (evt) => {
+  thumbnailElement.addEventListener('click', (evt) => {
     evt.preventDefault();
-    expandImage(picture);
+    expandImage(photoData);
   });
 
-  return pictureElement;
+  return thumbnailElement;
 };
 
 // Отрисовывает коллекцию изображений в галерее
-const imageRender = (objects)=>{
-  const fragment = document.createDocumentFragment();
-  for (let i = 0; i < objects.length; i++){
-    fragment.appendChild(renderPicture(objects[i]));
+const imageRender = (photosCollection)=>{
+  const galleryFragment = document.createDocumentFragment();
+  for (let i = 0; i < photosCollection.length; i++){
+    galleryFragment.appendChild(createPhotoThumbnail(photosCollection[i]));
   }
-  pictures.appendChild(fragment);
+  galleryContainer.appendChild(galleryFragment);
 };
 
 // Получение всех миниатюр в галерее
-const photos = pictures.getElementsByClassName('picture');
+const galleryThumbnails = galleryContainer.getElementsByClassName('photoData');
 
 // Очищает все изображения из галереи
-const clearPictures = ()=>{
-  if (photos){
-    [...photos].forEach((photo) => photo.remove());
+const clearGallery = ()=>{
+  if (galleryThumbnails){
+    [...galleryThumbnails].forEach((thumbnail) => thumbnail.remove());
   }
 };
 
-export {imageRender, clearPictures};
+export {imageRender, clearGallery};
