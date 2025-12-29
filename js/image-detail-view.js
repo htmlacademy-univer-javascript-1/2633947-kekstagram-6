@@ -1,5 +1,5 @@
 import { isEscapeKey } from './util.js';
-// Количество комментариев, загружаемых за один раз
+
 const COMMENTS_BATCH_SIZE = 5;
 // Модальное окно с изображением
 const fullscreenModal = document.querySelector('.big-picture');
