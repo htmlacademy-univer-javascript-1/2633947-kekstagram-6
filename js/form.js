@@ -1,6 +1,6 @@
 import { validateHashtagInput, getHashtagValidationError } from './tag-validation.js';
 import { isEscapeKey } from './util.js';
-import { initImageEditor, resetImageEditor } from './image-editor.js';
+import { initializeImageEditor, resetImageEditorSettings } from './image-editor.js';
 import { submitPhotoData } from './api.js';
 import { displaySelectedImage, clearPreview } from './image-preview-generator.js';
 
@@ -85,7 +85,7 @@ const unblockSubmitButton = () => {
 
 const resetForm = () => {
   form.reset();
-  resetImageEditor();
+  resetImageEditorSettings();
 
   hashtagInput.disabled = false;
   commentInput.disabled = false;
@@ -113,7 +113,7 @@ function onImageEditorOpen() {
   body.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
 
-  initImageEditor();
+  initializeImageEditor();
   updateSubmitButton();
 }
 

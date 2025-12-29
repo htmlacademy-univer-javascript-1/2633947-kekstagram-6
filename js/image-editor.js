@@ -1,21 +1,36 @@
+// Шаг изменения масштаба в процентах
 const SCALE_STEP = 25;
+// Минимальное значение масштаба
 const SCALE_MIN = 25;
+// Максимальное значение масштаба
 const SCALE_MAX = 100;
+// Значение масштаба по умолчанию
 const SCALE_DEFAULT = 100;
 
+// Поле отображения значения масштаба
 const scaleControl = document.querySelector('.scale__control--value');
+// Кнопка уменьшения масштаба
 const scaleSmaller = document.querySelector('.scale__control--smaller');
+// Кнопка увеличения масштаба
 const scaleBigger = document.querySelector('.scale__control--bigger');
+// Элемент превью изображения
 const imagePreview = document.querySelector('.img-upload__preview img');
 
+// Контейнер уровня эффекта
 const effectLevel = document.querySelector('.img-upload__effect-level');
+// Значение уровня эффекта
 const effectLevelValue = document.querySelector('.effect-level__value');
+// Слайдер уровня эффекта
 const effectLevelSlider = document.querySelector('.effect-level__slider');
+// Список эффектов
 const effectsList = document.querySelector('.effects__list');
 
+// Текущее значение масштаба
 let currentScale = SCALE_DEFAULT;
+ // Текущий выбранный эффект
 let currentEffect = 'none';
 
+// Возвращает настройки для указанного эффекта
 const getEffectSettings = (effectName) => {
   switch (effectName) {
     case 'chrome':
@@ -33,16 +48,19 @@ const getEffectSettings = (effectName) => {
   }
 };
 
+// Применяет выбранный эффект к изображению
 const applyEffect = (value) => {
   if (currentEffect === 'none') {
     imagePreview.style.filter = 'none';
     return;
   }
 
+  // Получение настроек текущего эффекта
   const settings = getEffectSettings(currentEffect);
   imagePreview.style.filter = `${settings.filter}(${value}${settings.unit})`;
 };
 
+// Обновляет масштаб изображения
 const updateScale = (value) => {
   currentScale = value;
 
@@ -51,26 +69,31 @@ const updateScale = (value) => {
   imagePreview.style.transform = `scale(${value / 100})`;
 };
 
+ // Обработчик клика по кнопке уменьшения масштаба
 const onScaleSmallerClick = () => {
   const newValue = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
   updateScale(newValue);
 };
 
+// Обработчик клика по кнопке увеличения масштаба
 const onScaleBiggerClick = () => {
   const newValue = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
   updateScale(newValue);
 };
 
+// Сбрасывает масштаб к значению по умолчанию
 const clearScale = () => {
   updateScale(SCALE_DEFAULT);
 };
 
+// Инициализирует элементы управления масштабом
 const initScale = () => {
   scaleSmaller.addEventListener('click', onScaleSmallerClick);
   scaleBigger.addEventListener('click', onScaleBiggerClick);
   clearScale();
 };
 
+// Инициализирует слайдер уровня эффекта
 const initSlider = () => {
   if (typeof noUiSlider === 'undefined') {
     return;
@@ -84,6 +107,7 @@ const initSlider = () => {
     return;
   }
 
+  // Создание слайдера noUiSlider
   noUiSlider.create(effectLevelSlider, {
     range: {
       min: 0,
@@ -115,6 +139,7 @@ const initSlider = () => {
   });
 };
 
+// Обновляет слайдер для указанного эффекта
 const updateSlider = (effectName) => {
   currentEffect = effectName;
 
@@ -126,7 +151,7 @@ const updateSlider = (effectName) => {
   }
 
   effectLevel.classList.remove('hidden');
-
+  // Получение настроек эффекта
   const settings = getEffectSettings(effectName);
 
   effectLevelSlider.noUiSlider.updateOptions({
@@ -144,12 +169,14 @@ const updateSlider = (effectName) => {
   applyEffect(settings.max);
 };
 
+// Обработчик изменения выбора эффекта
 const onEffectChange = (evt) => {
   if (evt.target.type === 'radio') {
     updateSlider(evt.target.value);
   }
 };
 
+// Сбрасывает эффекты к состоянию по умолчанию
 const clearEffects = () => {
   currentEffect = 'none';
   imagePreview.style.filter = 'none';
@@ -170,20 +197,23 @@ const clearEffects = () => {
   }
 };
 
+// Сбрасывает эффекты к состоянию по умолчанию
 const initEffects = () => {
   initSlider();
   effectsList.addEventListener('change', onEffectChange);
   clearEffects();
 };
 
-const initImageEditor = () => {
+// Основная функция инициализации редактора изображений
+const initializeImageEditor = () => {
   initScale();
   initEffects();
 };
 
-const resetImageEditor = () => {
+// Сбрасывает все настройки редактора
+const resetImageEditorSettings = () => {
   clearScale();
   clearEffects();
 };
 
-export { initImageEditor, resetImageEditor };
+export { initializeImageEditor, resetImageEditorSettings };
