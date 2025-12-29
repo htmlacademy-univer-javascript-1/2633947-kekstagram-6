@@ -1,4 +1,4 @@
-import {imageRender, clearPictures} from './picture.js';
+import {imageRender, clearPictures} from './gallery-manager.js';
 import {delayCall, randomizeArray} from './util.js';
 import {getPhotos} from './main.js';
 

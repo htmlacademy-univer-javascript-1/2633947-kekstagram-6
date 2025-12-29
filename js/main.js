@@ -1,5 +1,5 @@
 import { loadData } from './fetch.js';
-import { imageRender } from './picture.js';
+import { imageRender } from './gallery-manager.js';
 import './filters.js';
 import './form.js';
 
