@@ -1,4 +1,4 @@
-import { fetchPhotoData } from './fetch.js';
+import { fetchPhotoData } from './api.js';
 import { imageRender } from './gallery-manager.js';
 import './image-filter.js';
 import './form.js';
