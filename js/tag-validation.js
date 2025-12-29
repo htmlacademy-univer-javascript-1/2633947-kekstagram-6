@@ -1,69 +1,76 @@
-const MAX_HASHTAGS = 5; // Максимальное количество хештегов
-const MAX_HASHTAG_LENGTH = 20; // Максимальная длина одного хештега (включая #)
-const HASHTAG_CONTENT_PATTERN = /^[A-Za-zА-Яа-яЁё0-9]+$/; // Регулярное выражение для валидации содержимого хештега
+// Максимальное количество хештегов
+const MAX_HASHTAGS_COUNT = 5;
+// Максимальная длина одного хештега (включая #)
+const MAX_HASHTAG_LENGTH = 20;
+// Регулярное выражение для валидации содержимого хештега
+const VALID_HASHTAG_CONTENT_PATTERN = /^[A-Za-zА-Яа-яЁё0-9]+$/;
 
-const parseHashtags = (value) => // Разбивает строку на массив хештегов
-  value.trim() === '' ? [] : value.trim().split(/\s+/).filter((tag) => tag !== '');
+// Разбивает строку на массив хештегов
+const parseHashtags = (inputText) =>
+  inputText.trim() === '' ? [] : inputText.trim().split(/\s+/).filter((tag) => tag !== '');
 
-const validateSingleHashtag = (hashtag, seen) => { // Валидирует один хештег по всем правилам
-  const lowerCaseTag = hashtag.toLowerCase(); // Приведение к нижнему регистру для сравнения
+// Валидирует один хештег по всем правилам
+const validateIndividualHashtag = (singleHashtag, processedHashtags) => {
+  const lowercaseHashtag = singleHashtag.toLowerCase();
 
-  if (!hashtag.startsWith('#')) { // Проверка начала хештега с символа #
+  if (!singleHashtag.startsWith('#')) {
     return { isValid: false, error: 'Хэш-тег должен начинаться с символа #' };
   }
 
-  if (hashtag === '#') { // Проверка хештега, состоящего только из #
+  if (singleHashtag === '#') {
     return { isValid: false, error: 'Хэш-тег не может состоять только из решётки' };
   }
 
-  if (hashtag.length > MAX_HASHTAG_LENGTH) { // Проверка максимальной длины
+  if (singleHashtag.length > MAX_HASHTAG_LENGTH) {
     return { isValid: false, error: `Максимальная длина хэш-тега - ${MAX_HASHTAG_LENGTH} символов (включая #)` };
   }
 
-  const content = hashtag.substring(1); // Извлечение содержимого без символа #
-  if (content.length === 0) { // Проверка наличия содержимого после #
+  const content = singleHashtag.substring(1);
+  if (content.length === 0) {
     return { isValid: false, error: 'Хэш-тег не может состоять только из решётки' };
   }
 
-  if (!HASHTAG_CONTENT_PATTERN.test(content)) { // Проверка допустимых символов
+  if (!VALID_HASHTAG_CONTENT_PATTERN.test(content)) {
     return { isValid: false, error: 'Хэш-тег должен содержать только буквы и цифры' };
   }
 
-  if (seen.has(lowerCaseTag)) { // Проверка уникальности хештега
+  if (processedHashtags.has(lowercaseHashtag)) {
     return { isValid: false, error: 'Хэш-теги не должны повторяться' };
   }
 
-  seen.add(lowerCaseTag); // Добавление хештега в множество обработанных
-  return { isValid: true, error: '' }; // Возврат успешного результата
+  processedHashtags.add(lowercaseHashtag);
+  return { isValid: true, error: '' };
 };
 
-const validateHashtagInput = (value) => { // Проверяет всю строку с хештегами
-  const hashtags = parseHashtags(value); // Парсинг строки в массив хештегов
-  if (hashtags.length > MAX_HASHTAGS) { // Проверка максимального количества
+// Проверяет всю строку с хештегами
+const validateHashtagInput = (inputText) => {
+  const hashtags = parseHashtags(inputText);
+  if (hashtags.length > MAX_HASHTAGS_COUNT) {
     return false;
   }
 
-  const seen = new Set(); // Множество для отслеживания уникальности
-  return hashtags.every((hashtag) => validateSingleHashtag(hashtag, seen).isValid); // Валидация каждого хештега
+  const processedHashtags = new Set();
+  return hashtags.every((singleHashtag) => validateIndividualHashtag(singleHashtag, processedHashtags).isValid);
 };
 
-const getHashtagValidationError = (value) => { // Возвращает сообщение об ошибке валидации
-  const hashtags = parseHashtags(value); // Парсинг строки в массив хештегов
+// Возвращает сообщение об ошибке валидации
+const getHashtagValidationError = (inputText) => {
+  const hashtags = parseHashtags(inputText);
 
-  if (hashtags.length > MAX_HASHTAGS) { // Проверка максимального количества
-    return `Не более ${MAX_HASHTAGS} хэш-тегов`;
+  if (hashtags.length > MAX_HASHTAGS_COUNT) {
+    return `Не более ${MAX_HASHTAGS_COUNT} хэш-тегов`;
   }
 
-  const seen = new Set(); // Множество для отслеживания уникальности
+  const processedHashtags = new Set();
 
-  for (const hashtag of hashtags) { // Итерация по всем хештегам
-    const result = validateSingleHashtag(hashtag, seen); // Валидация текущего хештега
-    if (!result.isValid) { // Если хештег невалиден
-      return result.error; // Возврат сообщения об ошибке
+  for (const singleHashtag of hashtags) {
+    const result = validateIndividualHashtag(singleHashtag, processedHashtags);
+    if (!result.isValid) {
+      return result.error;
     }
   }
 
-  return ''; // Возврат пустой строки при отсутствии ошибок
+  return '';
 };
 
-export { validateHashtagInput, getHashtagValidationError }; // Экспорт функций валидации
+export { validateHashtagInput, getHashtagValidationError };
