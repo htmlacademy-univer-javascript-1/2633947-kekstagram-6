@@ -2,7 +2,7 @@ import { validateHashtags, getHashtagErrorMessage } from './hashtags.js';
 import { isEscapeKey } from './util.js';
 import { initImageEditor, resetImageEditor } from './image-editor.js';
 import { uploadData } from './fetch.js';
-import { showSelectedImage, resetPreview } from './preview.js';
+import { displaySelectedImage, clearPreview } from './preview.js';
 
 const MAX_COMMENT_LENGTH = 140;
 
@@ -91,7 +91,7 @@ const resetForm = () => {
   commentInput.disabled = false;
 
   unblockSubmitButton();
-  resetPreview();
+  clearPreview();
 
   hashtagError = '';
   commentError = '';
@@ -133,7 +133,7 @@ const onFileInputChange = () => {
     return;
   }
 
-  if (showSelectedImage(file)) {
+  if (displaySelectedImage(file)) {
     onImageEditorOpen();
   } else {
     fileInput.value = '';
