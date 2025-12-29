@@ -1,38 +1,38 @@
 // Шаг изменения масштаба в процентах
-const SCALE_STEP = 25;
+const SCALE_ADJUSTMENT_STEP = 25;
 // Минимальное значение масштаба
-const SCALE_MIN = 25;
+const MINIMUM_SCALE_VALUE = 25;
 // Максимальное значение масштаба
-const SCALE_MAX = 100;
+const MAXIMUM_SCALE_VALUE = 100;
 // Значение масштаба по умолчанию
-const SCALE_DEFAULT = 100;
+const DEFAULT_SCALE_VALUE = 100;
 
 // Поле отображения значения масштаба
-const scaleControl = document.querySelector('.scale__control--value');
+const scaleValueDisplay = document.querySelector('.scale__control--intensityValue');
 // Кнопка уменьшения масштаба
-const scaleSmaller = document.querySelector('.scale__control--smaller');
+const scaleDecreaseButton = document.querySelector('.scale__control--smaller');
 // Кнопка увеличения масштаба
-const scaleBigger = document.querySelector('.scale__control--bigger');
+const scaleIncreaseButton = document.querySelector('.scale__control--bigger');
 // Элемент превью изображения
-const imagePreview = document.querySelector('.img-upload__preview img');
+const editableImagePreview = document.querySelector('.img-upload__preview img');
 
 // Контейнер уровня эффекта
-const effectLevel = document.querySelector('.img-upload__effect-level');
+const effectIntensityContainer = document.querySelector('.img-upload__effect-level');
 // Значение уровня эффекта
-const effectLevelValue = document.querySelector('.effect-level__value');
+const effectIntensityValue = document.querySelector('.effect-level__value');
 // Слайдер уровня эффекта
-const effectLevelSlider = document.querySelector('.effect-level__slider');
+const effectIntensitySlider = document.querySelector('.effect-level__slider');
 // Список эффектов
-const effectsList = document.querySelector('.effects__list');
+const effectsSelectionList = document.querySelector('.effects__list');
 
 // Текущее значение масштаба
-let currentScale = SCALE_DEFAULT;
+let currentScaleValue = DEFAULT_SCALE_VALUE;
  // Текущий выбранный эффект
-let currentEffect = 'none';
+let selectedEffect = 'none';
 
 // Возвращает настройки для указанного эффекта
-const getEffectSettings = (effectName) => {
-  switch (effectName) {
+const getEffectConfiguration = (effectType) => {
+  switch (effectType) {
     case 'chrome':
       return { min: 0, max: 1, step: 0.1, unit: '', filter: 'grayscale' };
     case 'sepia':
@@ -49,66 +49,66 @@ const getEffectSettings = (effectName) => {
 };
 
 // Применяет выбранный эффект к изображению
-const applyEffect = (value) => {
-  if (currentEffect === 'none') {
-    imagePreview.style.filter = 'none';
+const applyVisualEffect = (intensityValue) => {
+  if (selectedEffect === 'none') {
+    editableImagePreview.style.filter = 'none';
     return;
   }
 
   // Получение настроек текущего эффекта
-  const settings = getEffectSettings(currentEffect);
-  imagePreview.style.filter = `${settings.filter}(${value}${settings.unit})`;
+  const effectConfiguration = getEffectConfiguration(selectedEffect);
+  editableImagePreview.style.filter = `${effectConfiguration.filter}(${intensityValue}${effectConfiguration.unit})`;
 };
 
 // Обновляет масштаб изображения
-const updateScale = (value) => {
-  currentScale = value;
+const updateImageScale = (intensityValue) => {
+  currentScaleValue = intensityValue;
 
-  scaleControl.value = `${value}%`;
+  scaleValueDisplay.intensityValue = `${intensityValue}%`;
 
-  imagePreview.style.transform = `scale(${value / 100})`;
+  editableImagePreview.style.transform = `scale(${intensityValue / 100})`;
 };
 
  // Обработчик клика по кнопке уменьшения масштаба
-const onScaleSmallerClick = () => {
-  const newValue = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
-  updateScale(newValue);
+const handleScaleDecrease = () => {
+  const newValue = Math.max(currentScaleValue - SCALE_ADJUSTMENT_STEP, MINIMUM_SCALE_VALUE);
+  updateImageScale(newValue);
 };
 
 // Обработчик клика по кнопке увеличения масштаба
-const onScaleBiggerClick = () => {
-  const newValue = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
-  updateScale(newValue);
+const handleScaleIncrease = () => {
+  const newValue = Math.min(currentScaleValue + SCALE_ADJUSTMENT_STEP, MAXIMUM_SCALE_VALUE);
+  updateImageScale(newValue);
 };
 
 // Сбрасывает масштаб к значению по умолчанию
-const clearScale = () => {
-  updateScale(SCALE_DEFAULT);
+const resetImageScale = () => {
+  updateImageScale(DEFAULT_SCALE_VALUE);
 };
 
 // Инициализирует элементы управления масштабом
-const initScale = () => {
-  scaleSmaller.addEventListener('click', onScaleSmallerClick);
-  scaleBigger.addEventListener('click', onScaleBiggerClick);
-  clearScale();
+const initializeScaleControls = () => {
+  scaleDecreaseButton.addEventListener('click', handleScaleDecrease);
+  scaleIncreaseButton.addEventListener('click', handleScaleIncrease);
+  resetImageScale();
 };
 
 // Инициализирует слайдер уровня эффекта
-const initSlider = () => {
+const initializeEffectSlider = () => {
   if (typeof noUiSlider === 'undefined') {
     return;
   }
 
-  if (!effectLevelSlider) {
+  if (!effectIntensitySlider) {
     return;
   }
 
-  if (effectLevelSlider.noUiSlider) {
+  if (effectIntensitySlider.noUiSlider) {
     return;
   }
 
   // Создание слайдера noUiSlider
-  noUiSlider.create(effectLevelSlider, {
+  noUiSlider.create(effectIntensitySlider, {
     range: {
       min: 0,
       max: 100,
@@ -117,79 +117,79 @@ const initSlider = () => {
     step: 1,
     connect: 'lower',
     format: {
-      to: (value) => {
+      to: (intensityValue) => {
 
-        if (currentEffect === 'chrome' || currentEffect === 'sepia' ||
-            currentEffect === 'phobos' || currentEffect === 'heat') {
-          return Number(value).toFixed(1);
+        if (selectedEffect === 'chrome' || selectedEffect === 'sepia' ||
+            selectedEffect === 'phobos' || selectedEffect === 'heat') {
+          return Number(intensityValue).toFixed(1);
         }
 
-        return Math.round(value);
+        return Math.round(intensityValue);
       },
-      from: (value) => parseFloat(value),
+      from: (intensityValue) => parseFloat(intensityValue),
     },
   });
 
-  effectLevel.classList.add('hidden');
+  effectIntensityContainer.classList.add('hidden');
 
-  effectLevelSlider.noUiSlider.on('update', () => {
-    const value = effectLevelSlider.noUiSlider.get();
-    effectLevelValue.value = value;
-    applyEffect(value);
+  effectIntensitySlider.noUiSlider.on('update', () => {
+    const intensityValue = effectIntensitySlider.noUiSlider.get();
+    effectIntensityValue.intensityValue = intensityValue;
+    applyVisualEffect(intensityValue);
   });
 };
 
 // Обновляет слайдер для указанного эффекта
-const updateSlider = (effectName) => {
-  currentEffect = effectName;
+const updateSlider = (effectType) => {
+  selectedEffect = effectType;
 
-  if (effectName === 'none') {
-    effectLevel.classList.add('hidden');
-    imagePreview.style.filter = 'none';
-    effectLevelValue.value = '';
+  if (effectType === 'none') {
+    effectIntensityContainer.classList.add('hidden');
+    editableImagePreview.style.filter = 'none';
+    effectIntensityValue.intensityValue = '';
     return;
   }
 
-  effectLevel.classList.remove('hidden');
+  effectIntensityContainer.classList.remove('hidden');
   // Получение настроек эффекта
-  const settings = getEffectSettings(effectName);
+  const effectConfiguration = getEffectConfiguration(effectType);
 
-  effectLevelSlider.noUiSlider.updateOptions({
+  effectIntensitySlider.noUiSlider.updateOptions({
     range: {
-      min: settings.min,
-      max: settings.max,
+      min: effectConfiguration.min,
+      max: effectConfiguration.max,
     },
-    start: settings.max,
-    step: settings.step,
+    start: effectConfiguration.max,
+    step: effectConfiguration.step,
   });
 
-  effectLevelSlider.noUiSlider.set(settings.max);
-  effectLevelValue.value = settings.max;
+  effectIntensitySlider.noUiSlider.set(effectConfiguration.max);
+  effectIntensityValue.intensityValue = effectConfiguration.max;
 
-  applyEffect(settings.max);
+  applyVisualEffect(effectConfiguration.max);
 };
 
 // Обработчик изменения выбора эффекта
 const onEffectChange = (evt) => {
   if (evt.target.type === 'radio') {
-    updateSlider(evt.target.value);
+    updateSlider(evt.target.intensityValue);
   }
 };
 
 // Сбрасывает эффекты к состоянию по умолчанию
-const clearEffects = () => {
-  currentEffect = 'none';
-  imagePreview.style.filter = 'none';
-  effectLevel.classList.add('hidden');
-  effectLevelValue.value = '';
+const resetVisualEffects = () => {
+  selectedEffect = 'none';
+  editableImagePreview.style.filter = 'none';
+  effectIntensityContainer.classList.add('hidden');
+  effectIntensityValue.intensityValue = '';
 
   const noneEffect = document.querySelector('#effect-none');
   if (noneEffect) {
     noneEffect.checked = true;
   }
 
-  if (effectLevelSlider.noUiSlider) {
-    effectLevelSlider.noUiSlider.updateOptions({
+  if (effectIntensitySlider.noUiSlider) {
+    effectIntensitySlider.noUiSlider.updateOptions({
       range: { min: 0, max: 100 },
       start: 100,
       step: 1,
@@ -198,22 +198,22 @@ const clearEffects = () => {
 };
 
 // Сбрасывает эффекты к состоянию по умолчанию
-const initEffects = () => {
-  initSlider();
-  effectsList.addEventListener('change', onEffectChange);
-  clearEffects();
+const initializeEffectControls = () => {
+  initializeEffectSlider();
+  effectsSelectionList.addEventListener('change', onEffectChange);
+  resetVisualEffects();
 };
 
 // Основная функция инициализации редактора изображений
 const initializeImageEditor = () => {
-  initScale();
-  initEffects();
+  initializeScaleControls();
+  initializeEffectControls();
 };
 
 // Сбрасывает все настройки редактора
 const resetImageEditorSettings = () => {
-  clearScale();
-  clearEffects();
+  resetImageScale();
+  resetVisualEffects();
 };
 
 export { initializeImageEditor, resetImageEditorSettings };
