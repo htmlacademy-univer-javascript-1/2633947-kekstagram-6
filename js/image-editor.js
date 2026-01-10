@@ -27,8 +27,50 @@ const effectsSelectionList = document.querySelector('.effects__list');
 
 // Текущее значение масштаба
 let currentScaleValue = DEFAULT_SCALE_VALUE;
- // Текущий выбранный эффект
+// Текущий выбранный эффект
 let selectedEffect = 'none';
+
+// === ФУНКЦИИ МАСШТАБИРОВАНИЯ ===
+
+// Обновляет масштаб изображения и значение в поле
+const updateImageScale = (value) => {
+  // Ограничиваем значение в допустимых пределах
+  currentScaleValue = Math.max(MINIMUM_SCALE_VALUE, Math.min(MAXIMUM_SCALE_VALUE, value));
+
+  // 1. ОБНОВЛЯЕМ ПОЛЕ .scale__control--value (главное требование HTML Academy!)
+  scaleValueDisplay.value = `${currentScaleValue}%`;
+
+  // 2. Применяем трансформацию к изображению
+  const scaleFactor = currentScaleValue / 100;
+  editableImagePreview.style.transform = `scale(${scaleFactor})`;
+};
+
+// Обработчик клика по кнопке уменьшения масштаба
+const handleScaleDecrease = () => {
+  updateImageScale(currentScaleValue - SCALE_ADJUSTMENT_STEP);
+};
+
+// Обработчик клика по кнопке увеличения масштаба
+const handleScaleIncrease = () => {
+  updateImageScale(currentScaleValue + SCALE_ADJUSTMENT_STEP);
+};
+
+// Сбрасывает масштаб к значению по умолчанию
+const resetImageScale = () => {
+  updateImageScale(DEFAULT_SCALE_VALUE);
+};
+
+// Инициализирует элементы управления масштабом
+const initializeScaleControls = () => {
+  // Устанавливаем начальное значение (перезаписывает 55% из HTML)
+  updateImageScale(DEFAULT_SCALE_VALUE);
+
+  // Назначаем обработчики кликов
+  scaleDecreaseButton.addEventListener('click', handleScaleDecrease);
+  scaleIncreaseButton.addEventListener('click', handleScaleIncrease);
+};
+
+// === ФУНКЦИИ ЭФФЕКТОВ ===
 
 // Возвращает настройки для указанного эффекта
 const getEffectConfiguration = (effectType) => {
@@ -60,39 +102,6 @@ const applyVisualEffect = (value) => {
   editableImagePreview.style.filter = `${effectConfiguration.filter}(${value}${effectConfiguration.unit})`;
 };
 
-// Обновляет масштаб изображения
-const updateImageScale = (value) => {
-  currentScaleValue = value;
-
-  scaleValueDisplay.value = `${value}%`;
-
-  editableImagePreview.style.transform = `scale(${value / 100})`;
-};
-
- // Обработчик клика по кнопке уменьшения масштаба
-const handleScaleDecrease = () => {
-  const newValue = Math.max(currentScaleValue - SCALE_ADJUSTMENT_STEP, MINIMUM_SCALE_VALUE);
-  updateImageScale(newValue);
-};
-
-// Обработчик клика по кнопке увеличения масштаба
-const handleScaleIncrease = () => {
-  const newValue = Math.min(currentScaleValue + SCALE_ADJUSTMENT_STEP, MAXIMUM_SCALE_VALUE);
-  updateImageScale(newValue);
-};
-
-// Сбрасывает масштаб к значению по умолчанию
-const resetImageScale = () => {
-  updateImageScale(DEFAULT_SCALE_VALUE);
-};
-
-// Инициализирует элементы управления масштабом
-const initializeScaleControls = () => {
-  scaleDecreaseButton.addEventListener('click', handleScaleDecrease);
-  scaleIncreaseButton.addEventListener('click', handleScaleIncrease);
-  resetImageScale();
-};
-
 // Инициализирует слайдер уровня эффекта
 const initializeEffectSlider = () => {
   if (typeof noUiSlider === 'undefined') {
@@ -118,12 +127,10 @@ const initializeEffectSlider = () => {
     connect: 'lower',
     format: {
       to: (value) => {
-
         if (selectedEffect === 'chrome' || selectedEffect === 'sepia' ||
             selectedEffect === 'phobos' || selectedEffect === 'heat') {
           return Number(value).toFixed(1);
         }
-
         return Math.round(value);
       },
       from: (value) => parseFloat(value),
@@ -197,12 +204,14 @@ const resetVisualEffects = () => {
   }
 };
 
-// Сбрасывает эффекты к состоянию по умолчанию
+// Инициализирует элементы управления эффектами
 const initializeEffectControls = () => {
   initializeEffectSlider();
   effectsSelectionList.addEventListener('change', onEffectChange);
   resetVisualEffects();
 };
+
+// === ЭКСПОРТИРУЕМЫЕ ФУНКЦИИ ===
 
 // Основная функция инициализации редактора изображений
 const initializeImageEditor = () => {
