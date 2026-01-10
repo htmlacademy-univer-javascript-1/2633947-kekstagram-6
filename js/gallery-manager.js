@@ -13,27 +13,27 @@ const renderPicture = (picture) => { // Создает DOM-элемент мин
   pictureElement.querySelector('.picture__likes').textContent = likes; // Установка количества лайков
 
   pictureElement.addEventListener('click', (evt) => { // Обработчик клика по миниатюре
-    evt.preventDefault(); // Предотвращение стандартного поведения ссылки
-    expandImage(picture); // Открытие полноэкранного просмотра
+    evt.preventDefault();
+    expandImage(picture);
   });
 
-  return pictureElement; // Возврат созданного элемента
+  return pictureElement;
 };
 
 const imageRender = (objects) => { // Отрисовывает коллекцию изображений в галерее
-  const fragment = document.createDocumentFragment(); // Создание фрагмента документа
-  for (let i = 0; i < objects.length; i++) { // Итерация по массиву объектов
-    fragment.appendChild(renderPicture(objects[i])); // Добавление миниатюры во фрагмент
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < objects.length; i++) {
+    fragment.appendChild(renderPicture(objects[i]));
   }
-  pictures.appendChild(fragment); // Добавление фрагмента в контейнер галереи
+  pictures.appendChild(fragment);
 };
 
 const photos = pictures.getElementsByClassName('picture'); // Получение всех миниатюр в галерее
 
 const clearPictures = () => { // Очищает все изображения из галереи
-  if (photos) { // Проверка наличия миниатюр
-    [...photos].forEach((photo) => photo.remove()); // Удаление каждой миниатюры
+  if (photos) {
+    [...photos].forEach((photo) => photo.remove());
   }
 };
 
-export { imageRender, clearPictures }; // Экспорт функций для использования в других модулях
+export { imageRender, clearPictures };
