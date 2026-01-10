@@ -30,14 +30,12 @@ let currentScaleValue = DEFAULT_SCALE_VALUE;
 // Текущий выбранный эффект
 let selectedEffect = 'none';
 
-// === ФУНКЦИИ МАСШТАБИРОВАНИЯ ===
 
 // Обновляет масштаб изображения и значение в поле
 const updateImageScale = (value) => {
   // Ограничиваем значение в допустимых пределах
   currentScaleValue = Math.max(MINIMUM_SCALE_VALUE, Math.min(MAXIMUM_SCALE_VALUE, value));
 
-  // 1. ОБНОВЛЯЕМ ПОЛЕ .scale__control--value (главное требование HTML Academy!)
   scaleValueDisplay.value = `${currentScaleValue}%`;
 
   // 2. Применяем трансформацию к изображению
